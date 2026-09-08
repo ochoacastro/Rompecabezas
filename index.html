@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rompecabezas de las Tablas</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#1b4332;
+    --leaf:#40916c;
+    --leaf-light:#74c69d;
+    --sun:#ffc857;
+    --coral:#ff6b6b;
+    --sky:#4ecdc4;
+    --cream:#fff8e9;
+    --ink:#1b3a2f;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito',sans-serif;
+    background:
+      radial-gradient(circle at 15% 10%, #2d6a4f 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #2d6a4f 0%, transparent 45%),
+      linear-gradient(160deg, var(--forest) 0%, #14332a 100%);
+    min-height:100vh;
+    color:var(--ink);
+    padding:18px 12px 40px;
+    overflow-x:hidden;
+  }
+  .wrap{ max-width:560px; margin:0 auto; }
+
+  h1{
+    font-family:'Baloo 2', sans-serif;
+    color:var(--cream);
+    text-align:center;
+    font-size:clamp(24px,7vw,34px);
+    margin:4px 0 2px;
+    text-shadow:0 3px 0 rgba(0,0,0,0.25);
+  }
+  .subtitle{
+    text-align:center;
+    color:var(--leaf-light);
+    font-weight:700;
+    margin:0 0 16px;
+    font-size:14px;
+    letter-spacing:.3px;
+  }
+
+  .chips{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    margin-bottom:16px;
+  }
+  .chip{
+    font-family:'Baloo 2',sans-serif;
+    font-size:16px;
+    border:none;
+    background:#ffffffdd;
+    color:var(--forest);
+    padding:8px 14px;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:700;
+    box-shadow:0 3px 0 #c9c2a8;
+    transition:transform .12s;
+  }
+  .chip:active{ transform:translateY(2px); box-shadow:0 1px 0 #c9c2a8; }
+  .chip.active{
+    background:var(--sun);
+    box-shadow:0 3px 0 #cc9a2f;
+  }
+
+  .menu-btn{
+    display:block;
+    width:100%;
+    font-family:'Baloo 2',sans-serif;
+    font-size:19px;
+    background:var(--sun);
+    border:none;
+    color:var(--forest);
+    font-weight:700;
+    padding:16px 20px;
+    border-radius:16px;
+    box-shadow:0 4px 0 #cc9a2f;
+    cursor:pointer;
+    margin-bottom:14px;
+    transition:transform .12s;
+  }
+  .menu-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #cc9a2f; }
+  .menu-btn.secondary{
+    background:#ffffff20;
+    color:var(--cream);
+    border:2px solid #ffffff40;
+    box-shadow:none;
+  }
+  .menu-btn.secondary:active{ transform:translateY(2px); }
+  .menu-btn:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+  }
+  .menu-title{
+    text-align:center;
+    color:var(--cream);
+    font-family:'Baloo 2',sans-serif;
+    font-size:15px;
+    margin:0 0 14px;
+  }
+  .overlay-actions{
+    display:flex; flex-direction:column; gap:10px; width:100%; max-width:260px;
+  }
+  .again-btn.secondary{
+    background:#ffffff20;
+    color:var(--cream);
+    border:2px solid #ffffff40;
+    box-shadow:none;
+  }
+
+  .select-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .table-card{
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    background:#ffffff14;
+    border:2px solid #ffffff20;
+    border-radius:14px;
+    padding:10px 4px 12px;
+    cursor:pointer;
+    transition:transform .12s;
+  }
+  .table-card:active{ transform:translateY(2px); }
+  .table-card.active{
+    border-color:var(--sun);
+    background:#ffffff28;
+  }
+  .table-card .chip{
+    width:100%;
+    box-shadow:none;
+    pointer-events:none;
+    padding:8px 0;
+  }
+  .stars-line{
+    font-size:11px;
+    letter-spacing:1px;
+    line-height:1.3;
+  }
+  .stars-line.seq{ color:#ffd166; }
+  .stars-line.manual{ color:#7fd1ff; }
+  .stars-line .dim{ opacity:.25; }
+  .stars-legend{
+    text-align:center;
+    color:var(--leaf-light);
+    font-size:12px;
+    margin:-6px 0 14px;
+  }
+  .stars-legend .seq{ color:#ffd166; font-weight:700; }
+  .stars-legend .manual{ color:#7fd1ff; font-weight:700; }
+
+  .overlay-stars{
+    font-size:34px;
+    letter-spacing:4px;
+    margin:-6px 0 14px;
+  }
+  .overlay-stars .dim{ opacity:.25; }
+  .overlay-note{
+    color:var(--leaf-light);
+    font-size:13px;
+    margin:-10px 0 18px;
+    max-width:280px;
+  }
+
+  .statbar{
+    display:flex; justify-content:space-between; align-items:center;
+    background:#ffffff20;
+    border:2px solid #ffffff30;
+    border-radius:16px;
+    padding:10px 16px;
+    margin-bottom:14px;
+    color:var(--cream);
+    font-family:'Baloo 2',sans-serif;
+    font-size:15px;
+  }
+  .statbar span.big{ font-size:18px; color:var(--sun); }
+
+  .board-frame{
+    position:relative;
+    border-radius:20px;
+    filter:drop-shadow(0 10px 0 rgba(0,0,0,0.25)) drop-shadow(0 18px 26px rgba(0,0,0,0.35));
+    background:#bde0fe;
+    padding:10px;
+  }
+  .scene-wrap{
+    position:relative;
+    border-radius:12px;
+    overflow:hidden;
+    aspect-ratio:4/3;
+  }
+  .scene{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    object-position:center;
+    display:block;
+  }
+  .grid{
+    position:absolute;
+    inset:0;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    grid-template-rows:repeat(3,1fr);
+    gap:6px;
+    padding:6px;
+    box-sizing:border-box;
+  }
+  .tile{
+    position:relative;
+    box-sizing:border-box;
+    border-radius:10px;
+    border:3px solid rgba(27,67,50,0.3);
+    background:linear-gradient(160deg,#ffffff 0%, #f2ead2 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:clamp(15px,4.5vw,22px);
+    color:var(--forest);
+    cursor:pointer;
+    user-select:none;
+    box-shadow:0 3px 0 rgba(27,67,50,0.3), 0 5px 8px rgba(0,0,0,0.2);
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .35s, background .2s;
+  }
+  .tile.wrong{
+    animation: shake .4s;
+    background:linear-gradient(160deg,#ffd2d2 0%, #ffb3b3 100%);
+  }
+  .tile.solved{
+    opacity:0;
+    transform:scale(0.2) rotate(20deg);
+    pointer-events:none;
+  }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-6px); }
+    40%{ transform:translateX(6px); }
+    60%{ transform:translateX(-4px); }
+    80%{ transform:translateX(4px); }
+  }
+
+  .equation-bar{
+    text-align:center;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    font-size:clamp(46px,15vw,64px);
+    color:var(--sun);
+    letter-spacing:.5px;
+    text-shadow:0 2px 0 rgba(0,0,0,0.25);
+  }
+  .equation-blank{
+    color:var(--coral);
+  }
+  .equation-row{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    margin:16px 0 4px;
+  }
+  .reroll-btn{
+    font-size:24px;
+    line-height:1;
+    background:#ffffff20;
+    border:2px solid #ffffff40;
+    border-radius:14px;
+    padding:8px 10px;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:transform .15s;
+  }
+  .reroll-btn:active{ transform:rotate(-90deg); }
+  .manual-btn{
+    font-size:22px;
+    line-height:1;
+    background:#ffffff20;
+    border:2px solid #ffffff40;
+    border-radius:14px;
+    padding:8px 10px;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:transform .15s;
+  }
+  .manual-btn:active{ transform:scale(0.88); }
+
+  .message{
+    text-align:center;
+    min-height:26px;
+    color:var(--sun);
+    font-family:'Baloo 2',sans-serif;
+    font-size:16px;
+    margin-top:10px;
+  }
+
+  .stamp-collection{
+    display:flex; flex-wrap:nowrap; gap:14px;
+    align-items:center;
+    min-height:190px;
+    background:#ffffff14;
+    border:2px dashed #ffffff30;
+    border-radius:16px;
+    padding:16px 14px;
+    margin-top:8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x mandatory;
+  }
+  .stamp-empty{
+    color:var(--leaf-light);
+    font-size:13px;
+    text-align:center;
+    margin:auto;
+    max-width:220px;
+  }
+  .stamp{
+    width:140px;
+    flex:0 0 auto;
+    scroll-snap-align:center;
+    display:flex; flex-direction:column; align-items:center;
+    background:#fffdf6;
+    border-radius:10px;
+    padding:8px;
+    box-shadow:0 4px 0 rgba(0,0,0,0.2);
+    animation:stampPop .45s cubic-bezier(.34,1.56,.64,1);
+    cursor:pointer;
+  }
+  .stamp .stamp-img{
+    width:124px; height:124px;
+    object-fit:cover;
+    border-radius:6px;
+    border:3px dashed #ff6b6b;
+    display:block;
+  }
+  .stamp .stamp-label{
+    font-family:'Baloo 2',sans-serif;
+    font-size:12px;
+    color:var(--forest);
+    margin-top:6px;
+    text-align:center;
+    line-height:1.2;
+  }
+  @keyframes stampPop{
+    from{ transform:scale(0.3) rotate(-15deg); opacity:0; }
+    to{ transform:scale(1) rotate(0deg); opacity:1; }
+  }
+
+  .stamp-lightbox{
+    position:fixed; inset:0;
+    background:rgba(20,51,42,0.9);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:24px;
+    z-index:60;
+    opacity:0; pointer-events:none;
+    transition:opacity .3s;
+  }
+  .stamp-lightbox.show{ opacity:1; pointer-events:auto; }
+  .stamp-lightbox img{
+    width:min(80vw,340px); height:min(80vw,340px);
+    object-fit:cover;
+    border-radius:16px;
+    border:6px dashed #ff6b6b;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  }
+  .stamp-lightbox .lightbox-label{
+    font-family:'Baloo 2',sans-serif;
+    color:var(--cream);
+    font-size:20px;
+    margin-top:16px;
+    text-align:center;
+  }
+  .stamp-lightbox .lightbox-close{
+    margin-top:20px;
+    font-family:'Baloo 2',sans-serif;
+    font-size:16px;
+    background:var(--sun);
+    border:none;
+    padding:10px 22px;
+    border-radius:14px;
+    box-shadow:0 4px 0 #cc9a2f;
+    cursor:pointer;
+    color:var(--forest);
+    font-weight:700;
+  }
+
+  .manual-mult-overlay{
+    position:fixed; inset:0;
+    background:rgba(20,51,42,0.92);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    z-index:70;
+    opacity:0; pointer-events:none;
+    transition:opacity .25s;
+  }
+  .manual-mult-overlay.show{ opacity:1; pointer-events:auto; }
+  .manual-mult-card{
+    background:#fffdf6;
+    border-radius:20px;
+    padding:22px 18px 20px;
+    max-width:300px; width:100%;
+    max-height:88vh;
+    overflow-y:auto;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    text-align:center;
+  }
+  .manual-mult-title{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    color:var(--forest);
+    font-size:17px;
+    margin-bottom:14px;
+  }
+  .manual-grid{
+    display:inline-grid;
+    grid-template-columns:30px repeat(3, 42px);
+    row-gap:4px;
+    justify-content:center;
+  }
+  .manual-cell{
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Baloo 2',sans-serif;
+    font-size:24px;
+    font-weight:800;
+    color:var(--forest);
+    height:42px;
+  }
+  .manual-op-cell{ font-size:19px; }
+  .manual-carry-input, .manual-answer-input{
+    width:32px; height:32px;
+    text-align:center;
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    border:2px solid var(--leaf-light);
+    border-radius:8px;
+    font-size:16px;
+    color:var(--coral);
+    background:#eef7f1;
+  }
+  .manual-answer-input{
+    width:38px; height:44px;
+    font-size:22px;
+    color:var(--forest);
+    border-color:var(--sun);
+    background:#fff8e9;
+  }
+  .manual-line-row{
+    border-top:3px solid var(--forest);
+    margin:2px 0 4px;
+  }
+  .manual-close-btn{
+    margin-top:10px;
+    width:auto;
+    display:inline-block;
+    padding:10px 26px;
+  }
+  .manual-swap-btn{
+    margin-top:16px;
+    margin-bottom:0;
+    width:auto;
+    display:inline-block;
+    padding:10px 20px;
+    font-size:15px;
+  }
+
+  .celebrate-overlay{
+    position:fixed; inset:0;
+    background:rgba(20,51,42,0.88);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    padding:24px;
+    z-index:50;
+    opacity:0; pointer-events:none;
+    transition:opacity .4s;
+  }
+  .celebrate-overlay.show{ opacity:1; pointer-events:auto; }
+  .celebrate-overlay h2{
+    font-family:'Baloo 2',sans-serif;
+    color:var(--sun);
+    font-size:clamp(28px,8vw,42px);
+    margin-bottom:6px;
+  }
+  .celebrate-overlay p{
+    color:var(--cream);
+    font-size:17px;
+    max-width:320px;
+    margin-bottom:20px;
+  }
+  .again-btn{
+    font-family:'Baloo 2',sans-serif;
+    font-size:19px;
+    background:var(--sun);
+    border:none;
+    padding:12px 26px;
+    border-radius:16px;
+    box-shadow:0 4px 0 #cc9a2f;
+    cursor:pointer;
+    color:var(--forest);
+    font-weight:700;
+  }
+  .again-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 #cc9a2f; }
+
+  .confetti{
+    position:absolute;
+    top:-10px;
+    width:10px; height:14px;
+    border-radius:2px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform:translateY(110vh) rotate(540deg); opacity:0.9; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🐒 Rompecabezas de las Tablas 🐒</h1>
+  <p class="subtitle">Cada tabla tiene su propio animalito escondido</p>
+
+  <div id="menuScreen" class="screen">
+    <button id="menuPlayBtn" class="menu-btn">▶️ Jugar (tablas del 1 al 12)</button>
+    <button id="menuSelectBtn" class="menu-btn">🎯 Elegir una tabla</button>
+    <button id="menuStampsBtn" class="menu-btn">🎫 Ver mis estampillas</button>
+  </div>
+
+  <div id="selectTableScreen" class="screen" style="display:none;">
+    <p class="menu-title">Elige la tabla que quieres practicar</p>
+    <p class="stars-legend"><span class="seq">★ Jugar</span> &nbsp;·&nbsp; <span class="manual">★ Manual</span></p>
+    <div class="select-grid" id="selectChips"></div>
+    <button id="selectPlayBtn" class="menu-btn">Jugar esta tabla</button>
+    <button id="selectBackBtn" class="menu-btn secondary">⬅️ Regresar al menú</button>
+  </div>
+
+  <div id="stampsScreen" class="screen" style="display:none;">
+    <p class="menu-title">🎫 Mi colección de estampillas</p>
+    <div class="stamp-collection" id="stampCollectionView">
+      <p class="stamp-empty" id="stampEmptyView">Todavía no tienes estampillas. ¡Completa una tabla sin errores para ganar la primera!</p>
+    </div>
+    <button id="stampsBackBtn" class="menu-btn secondary" style="margin-top:14px;">⬅️ Regresar al menú</button>
+  </div>
+
+  <div id="gameScreen" class="screen" style="display:none;">
+    <div style="text-align:center;margin-bottom:10px;">
+      <button id="soundToggle" class="chip" style="font-size:14px;">🔊 Sonido activado</button>
+      <button id="gameMenuBtn" class="chip" style="font-size:14px;">⬅️ Menú</button>
+    </div>
+
+    <div class="statbar">
+      <span>⭐ Aciertos: <span class="big" id="scoreCount">0</span>/12</span>
+      <span>🍌 Tabla del <span class="big" id="currentTable">3</span></span>
+    </div>
+
+    <div class="board-frame">
+      <div class="scene-wrap" id="sceneWrap">
+        <img class="scene" id="scene" alt="">
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+
+    <div class="equation-row">
+      <div class="equation-bar" id="equationBar">&nbsp;</div>
+      <button class="manual-btn" id="manualBtn" title="Multiplicar manualmente" style="display:none;">✏️</button>
+      <button class="reroll-btn" id="rerollBtn" title="Cambiar pregunta">🔃</button>
+    </div>
+
+    <div class="message" id="message">&nbsp;</div>
+  </div>
+</div>
+
+<div class="celebrate-overlay" id="overlay">
+  <h2>¡Lo lograste! 🎉</h2>
+  <div class="overlay-stars" id="overlayStars"></div>
+  <p id="overlayText">Completaste la tabla y descubriste al animalito.</p>
+  <p class="overlay-note" id="overlayNote"></p>
+  <div class="overlay-actions">
+    <button class="again-btn" id="nextTableBtn">Siguiente tabla ➡️</button>
+    <button class="again-btn secondary" id="retryBtn">🔁 Reintentar</button>
+    <button class="again-btn secondary" id="overlayMenuBtn">⬅️ Regresar al menú</button>
+  </div>
+</div>
+
+<div class="stamp-lightbox" id="stampLightbox">
+  <img id="stampLightboxImg" src="" alt="">
+  <div class="lightbox-label" id="stampLightboxLabel"></div>
+  <button class="lightbox-close" id="stampLightboxClose">Cerrar</button>
+</div>
+
+<div class="manual-mult-overlay" id="manualMultOverlay">
+  <div class="manual-mult-card">
+    <div class="manual-mult-title">✏️ Multiplicación manual</div>
+    <div class="manual-grid" id="manualGrid"></div>
+    <button class="menu-btn secondary manual-swap-btn" id="manualSwapBtn">🔄 Girar factores</button>
+    <button class="menu-btn manual-close-btn" id="manualCloseBtn">Cerrar</button>
+  </div>
+</div>
+
+<script>
+const gridEl = document.getElementById('grid');
+const equationBarEl = document.getElementById('equationBar');
+const messageEl = document.getElementById('message');
+const scoreCountEl = document.getElementById('scoreCount');
+const currentTableEl = document.getElementById('currentTable');
+const overlay = document.getElementById('overlay');
+const overlayText = document.getElementById('overlayText');
+const overlayStarsEl = document.getElementById('overlayStars');
+const overlayNoteEl = document.getElementById('overlayNote');
+const sceneEl = document.getElementById('scene');
+const sceneWrapEl = document.getElementById('sceneWrap');
+
+const menuScreenEl = document.getElementById('menuScreen');
+const selectTableScreenEl = document.getElementById('selectTableScreen');
+const stampsScreenEl = document.getElementById('stampsScreen');
+const gameScreenEl = document.getElementById('gameScreen');
+const menuPlayBtn = document.getElementById('menuPlayBtn');
+const menuSelectBtn = document.getElementById('menuSelectBtn');
+const menuStampsBtn = document.getElementById('menuStampsBtn');
+const selectChipsEl = document.getElementById('selectChips');
+const selectPlayBtn = document.getElementById('selectPlayBtn');
+const selectBackBtn = document.getElementById('selectBackBtn');
+const stampsBackBtn = document.getElementById('stampsBackBtn');
+const stampCollectionViewEl = document.getElementById('stampCollectionView');
+const gameMenuBtn = document.getElementById('gameMenuBtn');
+const nextTableBtn = document.getElementById('nextTableBtn');
+const retryBtn = document.getElementById('retryBtn');
+const overlayMenuBtn = document.getElementById('overlayMenuBtn');
+const manualBtn = document.getElementById('manualBtn');
+const manualMultOverlay = document.getElementById('manualMultOverlay');
+const manualGrid = document.getElementById('manualGrid');
+const manualCloseBtn = document.getElementById('manualCloseBtn');
+const manualSwapBtn = document.getElementById('manualSwapBtn');
+
+let currentTable = 3;
+let selectedTable = 1;
+let gameMode = 'sequential'; // 'sequential' (jugar 1-12) o 'single' (tabla elegida)
+let collectedStamps = [];
+let lightboxIsCompletionFlow = false;
+let pendingStars = 0;
+let factorsOrder = [];
+let activeIndex = 0;
+let solvedCount = 0;
+let errorCount = 0;
+let soundOn = true;
+let celebrationTimer = null;
+let starsSequential = {}; // mejores estrellas por tabla en modo "jugar" (1-12)
+let starsManual = {}; // mejores estrellas por tabla en modo "elegir tabla"
+
+// ---- Motor de sonido (tonos generados, sin archivos externos) ----
+let audioCtx = null;
+function getCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq, start, dur, type='sine', gainVal=0.18){
+  const ctx = getCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+  gain.gain.setValueAtTime(0, ctx.currentTime + start);
+  gain.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + start + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(ctx.currentTime + start);
+  osc.stop(ctx.currentTime + start + dur + 0.05);
+}
+function playClick(){
+  if(!soundOn) return;
+  tone(520, 0, 0.08, 'triangle', 0.12);
+}
+
+// ---- Voz (lee la pregunta y la respuesta en voz alta) ----
+function speak(text){
+  if(!soundOn) return;
+  if(!('speechSynthesis' in window)) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'es-ES';
+  utter.rate = 0.92;
+  utter.pitch = 1.05;
+  window.speechSynthesis.speak(utter);
+}
+function speakQuestion(table, f){
+  speak(`${table} por ${f}`);
+}
+function speakCorrect(table, f, answer){
+  speak(`Correcto`);
+}
+function speakWrong(answer){
+  speak(`Incorrecto`);
+}
+
+function playCorrect(){
+  if(!soundOn) return;
+  tone(523.25, 0, 0.14, 'sine');
+  tone(659.25, 0.1, 0.16, 'sine');
+  tone(783.99, 0.2, 0.22, 'sine');
+}
+function playWrong(){
+  if(!soundOn) return;
+  tone(220, 0, 0.18, 'sawtooth', 0.12);
+  tone(180, 0.12, 0.22, 'sawtooth', 0.1);
+}
+function playVictory(){
+  if(!soundOn) return;
+  [523.25,587.33,659.25,783.99,880].forEach((f,i)=> tone(f, i*0.14, 0.28, 'triangle', 0.16));
+}
+document.getElementById('soundToggle').addEventListener('click', function(){
+  soundOn = !soundOn;
+  this.textContent = soundOn ? '🔊 Sonido activado' : '🔇 Sonido apagado';
+  if(!soundOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+  if(soundOn) playClick();
+});
+
+// ---- Fotos reales de Unsplash, una por cada tabla (se revelan al completar) ----
+const sceneImages = {
+  gato: 'https://images.unsplash.com/photo-1684176025644-95d5c9303648?w=800&q=80&auto=format&fit=crop',
+  perro: 'https://images.unsplash.com/photo-1765934785570-beb8c9a36446?w=800&q=80&auto=format&fit=crop',
+  tucan: 'https://images.unsplash.com/photo-1739357573118-550b72ec9be8?w=800&q=80&auto=format&fit=crop',
+  leon: 'https://images.unsplash.com/photo-1759352371478-6071563e058a?w=800&q=80&auto=format&fit=crop',
+  elefante: 'https://images.unsplash.com/photo-1760720221487-5a8b332a2078?w=800&q=80&auto=format&fit=crop',
+  jirafa: 'https://images.unsplash.com/photo-1716413003994-715ebc450e90?w=800&q=80&auto=format&fit=crop',
+  mono: 'https://images.unsplash.com/photo-1677741447040-f998d387a1a0?w=800&q=80&auto=format&fit=crop',
+  panda: 'https://images.unsplash.com/photo-1767269916501-de99bdcede97?w=800&q=80&auto=format&fit=crop',
+  tortuga: 'https://images.unsplash.com/photo-1496196614460-48988a57fccf?w=800&q=80&auto=format&fit=crop',
+  delfin: 'https://images.unsplash.com/photo-1686080187834-bf843d798d9a?w=800&q=80&auto=format&fit=crop',
+  koala: 'https://images.unsplash.com/photo-1504575958497-ccdd586c2997?w=800&q=80&auto=format&fit=crop',
+  cebra: 'https://images.unsplash.com/photo-1716750668795-7fb39ad3b298?w=800&q=80&auto=format&fit=crop'
+};
+const sceneKeys = Object.keys(sceneImages);
+const animalPorTabla = {
+  1:'gato', 2:'perro', 3:'tucan', 4:'leon', 5:'elefante',
+  6:'jirafa', 7:'mono', 8:'panda', 9:'tortuga', 10:'delfin',
+  11:'koala', 12:'cebra'
+};
+const nombresAnimales = {
+  gato:'gatito', perro:'perrito', tucan:'tucán', leon:'leoncito',
+  elefante:'elefante', jirafa:'jirafa', mono:'mono', panda:'panda',
+  tortuga:'tortuga', delfin:'delfín', koala:'koala', cebra:'cebra'
+};
+let sceneKey = animalPorTabla[3];
+
+function pickGridLayout(aspect){
+  // Opciones de columnas x filas que dan 12 piezas en total.
+  const options = [[1,12],[2,6],[3,4],[4,3],[6,2],[12,1]];
+  let best = options[0], bestDiff = Infinity;
+  options.forEach(([cols, rows])=>{
+    const diff = Math.abs((cols/rows) - aspect);
+    if(diff < bestDiff){ bestDiff = diff; best = [cols, rows]; }
+  });
+  return best;
+}
+
+function applyGridLayout(){
+  if(!sceneEl.naturalWidth) return;
+  const aspect = sceneEl.naturalWidth / sceneEl.naturalHeight;
+  const [cols, rows] = pickGridLayout(aspect);
+  gridEl.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  gridEl.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  sceneWrapEl.style.aspectRatio = `${cols} / ${rows}`;
+}
+
+function setScene(){
+  sceneKey = animalPorTabla[currentTable] || sceneKeys[0];
+  sceneEl.src = sceneImages[sceneKey];
+  if(sceneEl.complete) applyGridLayout();
+}
+sceneEl.addEventListener('load', applyGridLayout);
+
+// ---- Estrellas: 0 errores=3⭐, 1 error=2⭐, 2-3 errores=1⭐, más de 3=0⭐ ----
+function computeStars(errors){
+  if(errors === 0) return 3;
+  if(errors === 1) return 2;
+  if(errors <= 3) return 1;
+  return 0;
+}
+function starsHtml(count, symbol, filledClass){
+  let html = '';
+  for(let i=0;i<3;i++){
+    html += i < count ? `<span class="${filledClass}">${symbol}</span>` : `<span class="dim">${symbol}</span>`;
+  }
+  return html;
+}
+
+// ---- Selector de tabla única (pantalla "Elegir una tabla"), con estrellas por tabla ----
+function buildSelectTableScreen(){
+  selectChipsEl.innerHTML = '';
+  for(let t=1;t<=12;t++){
+    const card = document.createElement('div');
+    card.className = 'table-card' + (t===selectedTable ? ' active':'');
+    card.innerHTML = `
+      <div class="chip">${t}</div>
+      <div class="stars-line seq">${starsHtml(starsSequential[t]||0, '★', 'seq')}</div>
+      <div class="stars-line manual">${starsHtml(starsManual[t]||0, '★', 'manual')}</div>
+    `;
+    card.addEventListener('click', ()=>{
+      playClick();
+      selectedTable = t;
+      currentTable = t;
+      document.querySelectorAll('.table-card').forEach(c=>c.classList.remove('active'));
+      card.classList.add('active');
+    });
+    selectChipsEl.appendChild(card);
+  }
+}
+buildSelectTableScreen();
+
+// ---- Navegación entre pantallas (menú / elegir tabla / estampillas / juego) ----
+function showScreen(id){
+  [menuScreenEl, selectTableScreenEl, stampsScreenEl, gameScreenEl].forEach(el=>{
+    el.style.display = (el.id === id) ? '' : 'none';
+  });
+}
+function goToMenu(){
+  overlay.classList.remove('show');
+  showScreen('menuScreen');
+}
+
+menuPlayBtn.addEventListener('click', ()=>{
+  playClick();
+  gameMode = 'sequential';
+  currentTable = 1;
+  showScreen('gameScreen');
+  buildRound();
+});
+
+menuSelectBtn.addEventListener('click', ()=>{
+  playClick();
+  buildSelectTableScreen();
+  showScreen('selectTableScreen');
+});
+
+selectBackBtn.addEventListener('click', ()=>{
+  playClick();
+  showScreen('menuScreen');
+});
+
+selectPlayBtn.addEventListener('click', ()=>{
+  playClick();
+  gameMode = 'single';
+  currentTable = selectedTable;
+  showScreen('gameScreen');
+  buildRound();
+});
+
+menuStampsBtn.addEventListener('click', ()=>{
+  playClick();
+  renderStampsView();
+  showScreen('stampsScreen');
+});
+
+stampsBackBtn.addEventListener('click', ()=>{
+  playClick();
+  showScreen('menuScreen');
+});
+
+gameMenuBtn.addEventListener('click', ()=>{
+  playClick();
+  goToMenu();
+});
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function buildRound(){
+  solvedCount = 0;
+  activeIndex = 0;
+  errorCount = 0;
+  scoreCountEl.textContent = 0;
+  currentTableEl.textContent = currentTable;
+  messageEl.innerHTML = '&nbsp;';
+  overlay.classList.remove('show');
+  setScene();
+
+  factorsOrder = shuffle([1,2,3,4,5,6,7,8,9,10,11,12]);
+  const tilesPlacement = shuffle([...factorsOrder]);
+  gridEl.innerHTML = '';
+  tilesPlacement.forEach(f=>{
+    const tile = document.createElement('button');
+    tile.className = 'tile';
+    tile.dataset.answer = currentTable * f;
+    tile.textContent = currentTable * f;
+    tile.addEventListener('click', ()=>onTileClick(tile));
+    gridEl.appendChild(tile);
+  });
+
+  updateEquationBar();
+}
+
+function updateEquationBar(){
+  if(activeIndex >= factorsOrder.length) return;
+  const f = factorsOrder[activeIndex];
+  equationBarEl.innerHTML = `${currentTable} × ${f} = <span class="equation-blank">?</span>`;
+  manualBtn.style.display = (currentTable >= 10 || f >= 10) ? '' : 'none';
+  speakQuestion(currentTable, f);
+}
+
+function onTileClick(tile){
+  if(tile.classList.contains('solved')) return;
+  playClick();
+  const f = factorsOrder[activeIndex];
+  const target = currentTable * f;
+  const val = parseInt(tile.dataset.answer, 10);
+
+  if(val === target){
+    tile.classList.add('solved');
+    solvedCount++;
+    scoreCountEl.textContent = solvedCount;
+    equationBarEl.innerHTML = `${currentTable} × ${f} = ${target}`;
+    messageEl.textContent = `¡Correcto! 🎈`;
+    playCorrect();
+    speakCorrect(currentTable, f, target);
+    burstConfettiAt(tile);
+    activeIndex++;
+    if(solvedCount === 12){
+      setTimeout(()=>{ playVictory(); onPuzzleComplete(); }, 500);
+    } else {
+      setTimeout(updateEquationBar, 1200);
+    }
+  } else {
+    tile.classList.add('wrong');
+    errorCount++;
+    messageEl.textContent = `Incorrecto. 🐢`;
+    playWrong();
+    speakWrong(target);
+    setTimeout(()=>tile.classList.remove('wrong'),400);
+  }
+}
+
+function rerollQuestion(){
+  if(activeIndex >= factorsOrder.length - 1) return;
+  playClick();
+  const remaining = factorsOrder.length - activeIndex;
+  const idx = activeIndex + 1 + Math.floor(Math.random()*(remaining-1));
+  [factorsOrder[activeIndex], factorsOrder[idx]] = [factorsOrder[idx], factorsOrder[activeIndex]];
+  updateEquationBar();
+}
+document.getElementById('rerollBtn').addEventListener('click', rerollQuestion);
+
+function burstConfettiAt(tile){
+  const rect = tile.getBoundingClientRect();
+  const colors = ['#ffc857','#ff6b6b','#4ecdc4','#74c69d','#ffffff'];
+  for(let i=0;i<10;i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = (rect.left + rect.width/2 + (Math.random()*40-20)) + 'px';
+    c.style.top = (rect.top + rect.height/2) + 'px';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.position = 'fixed';
+    c.style.animationDuration = (0.8 + Math.random()*0.6) + 's';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 1500);
+  }
+}
+
+// ---- Colección de estampillas: un diseño de color distinto y aleatorio para cada una, sin repetir hasta agotar la baraja ----
+const stampColors = ['#ff6b6b','#4ecdc4','#ffc857','#74c69d','#a78bfa','#f472b6','#38bdf8','#fb923c','#34d399','#facc15','#f87171','#818cf8'];
+let stampBag = [];
+function nextStampColor(){
+  if(stampBag.length === 0){
+    stampBag = shuffle([...Array(stampColors.length).keys()]);
+  }
+  return stampColors[stampBag.pop()];
+}
+const stampLightbox = document.getElementById('stampLightbox');
+const stampLightboxImg = document.getElementById('stampLightboxImg');
+const stampLightboxLabel = document.getElementById('stampLightboxLabel');
+
+function openStampLightbox(src, labelHtml, color){
+  stampLightboxImg.src = src;
+  stampLightboxImg.style.borderColor = color;
+  stampLightboxLabel.innerHTML = labelHtml;
+  stampLightbox.classList.add('show');
+}
+function closeStampLightbox(){
+  stampLightbox.classList.remove('show');
+  if(lightboxIsCompletionFlow){
+    lightboxIsCompletionFlow = false;
+    showChoiceOverlay(pendingStars);
+  }
+}
+document.getElementById('stampLightboxClose').addEventListener('click', closeStampLightbox);
+stampLightbox.addEventListener('click', (e)=>{
+  if(e.target === stampLightbox) closeStampLightbox();
+});
+
+function makeStampEl(data){
+  const stamp = document.createElement('div');
+  stamp.className = 'stamp';
+  stamp.innerHTML = `
+    <img class="stamp-img" style="border-color:${data.color}" src="${data.imgSrc}" alt="${data.alt}">
+    <div class="stamp-label">${data.labelHtml}</div>
+  `;
+  stamp.addEventListener('click', ()=>{
+    playClick();
+    lightboxIsCompletionFlow = false;
+    openStampLightbox(data.imgSrc, data.labelHtml, data.color);
+  });
+  return stamp;
+}
+
+function addStampToCollection(){
+  const color = nextStampColor();
+  const imgSrc = sceneImages[sceneKey];
+  const labelHtml = `Tabla del ${currentTable}<br>${nombresAnimales[sceneKey] || ''}`;
+  const data = { imgSrc, labelHtml, color, alt: nombresAnimales[sceneKey] || '' };
+  collectedStamps.push(data);
+  return color;
+}
+
+function renderStampsView(){
+  stampCollectionViewEl.innerHTML = '';
+  if(collectedStamps.length === 0){
+    const p = document.createElement('p');
+    p.className = 'stamp-empty';
+    p.textContent = 'Todavía no tienes estampillas. ¡Completa una tabla para ganar la primera!';
+    stampCollectionViewEl.appendChild(p);
+    return;
+  }
+  collectedStamps.forEach(data => stampCollectionViewEl.appendChild(makeStampEl(data)));
+}
+
+function nextTable(){
+  overlay.classList.remove('show');
+  currentTable = currentTable === 12 ? 1 : currentTable + 1;
+  buildRound();
+}
+
+function retryTable(){
+  overlay.classList.remove('show');
+  buildRound();
+}
+
+function showChoiceOverlay(stars){
+  overlayText.textContent = `Completaste la tabla del ${currentTable} y descubriste al ${nombresAnimales[sceneKey] || 'animalito'}.`;
+  const starClass = gameMode === 'sequential' ? 'seq' : 'manual';
+  overlayStarsEl.innerHTML = starsHtml(stars, gameMode === 'sequential' ? '⭐' : '★', starClass);
+  if(stars === 3){
+    overlayNoteEl.textContent = '¡Sin errores! Ganaste una estampilla nueva 🎫';
+  } else if(errorCount === 0){
+    overlayNoteEl.textContent = '';
+  } else {
+    overlayNoteEl.textContent = 'Resuélvela sin errores la próxima vez para ganar una estampilla.';
+  }
+  nextTableBtn.style.display = gameMode === 'sequential' ? 'block' : 'none';
+  overlay.classList.add('show');
+}
+
+function onPuzzleComplete(){
+  const stars = computeStars(errorCount);
+  const store = gameMode === 'sequential' ? starsSequential : starsManual;
+  if(stars > (store[currentTable]||0)) store[currentTable] = stars;
+
+  if(errorCount === 0){
+    const color = addStampToCollection();
+    lightboxIsCompletionFlow = true;
+    openStampLightbox(sceneImages[sceneKey], `Tabla del ${currentTable}<br>${nombresAnimales[sceneKey] || ''}`, color);
+    pendingStars = stars;
+  } else {
+    showChoiceOverlay(stars);
+  }
+}
+
+nextTableBtn.addEventListener('click', ()=>{ playClick(); nextTable(); });
+retryBtn.addEventListener('click', ()=>{ playClick(); retryTable(); });
+overlayMenuBtn.addEventListener('click', ()=>{ playClick(); goToMenu(); });
+
+// ---- Ventana de multiplicación manual (lápiz ✏️): solo para tablas 10, 11 y 12 ----
+function manualMakeCell(col, row, extraClass){
+  const cell = document.createElement('div');
+  cell.className = 'manual-cell' + (extraClass ? ' ' + extraClass : '');
+  cell.style.gridColumn = col; cell.style.gridRow = row;
+  manualGrid.appendChild(cell);
+  return cell;
+}
+
+function manualAddCarryRow(row, cols){
+  for(let col = 2; col <= 4; col++){
+    const cell = manualMakeCell(col, row);
+    if(cols.includes(col)){
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.inputMode = 'numeric';
+      inp.maxLength = 1;
+      inp.className = 'manual-carry-input';
+      inp.setAttribute('aria-label', 'Llevada');
+      cell.appendChild(inp);
+    }
+  }
+}
+
+function manualAddStaticNumberRow(row, value){
+  const digits = String(value).padStart(3, ' ').split('');
+  for(let col = 2; col <= 4; col++){
+    const cell = manualMakeCell(col, row);
+    const d = digits[col - 2];
+    cell.textContent = (d === ' ' || d === undefined) ? '' : d;
+  }
+}
+
+function manualAddSymbolRow(row, symbol, value){
+  const symCell = manualMakeCell(1, row, 'manual-op-cell');
+  symCell.textContent = symbol;
+  manualAddStaticNumberRow(row, value);
+}
+
+function manualAddSymbolOnly(row, symbol){
+  const symCell = manualMakeCell(1, row, 'manual-op-cell');
+  symCell.textContent = symbol;
+}
+
+function manualAddLineRow(row){
+  const line = manualMakeCell(2, row);
+  line.className = 'manual-line-row';
+  line.style.gridColumn = '2 / 5';
+}
+
+let manualAllAnswerInputs = [];
+function manualAddAnswerRow(row, startCol, width){
+  const inputs = [];
+  for(let col = 2; col <= 4; col++){
+    const cell = manualMakeCell(col, row);
+    if(col >= startCol && col < startCol + width){
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.inputMode = 'numeric';
+      inp.maxLength = 1;
+      inp.className = 'manual-answer-input';
+      inp.setAttribute('aria-label', 'Dígito de la respuesta');
+      cell.appendChild(inp);
+      inputs.push(inp);
+    }
+  }
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('input', () => {
+      inp.value = inp.value.replace(/[^0-9]/g, '').slice(0, 1);
+      if(inp.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+    });
+    inp.addEventListener('keydown', (e) => {
+      if(e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx - 1].focus();
+    });
+  });
+  manualAllAnswerInputs = manualAllAnswerInputs.concat(inputs);
+  return inputs;
+}
+
+function buildManualGrid(a, b){
+  manualGrid.innerHTML = '';
+  manualAllAnswerInputs = [];
+  const bIsTwoDigits = String(b).length > 1;
+  let row = 1;
+
+  // Fila de llevadas para el primer producto, arriba de las centenas y decenas del número de arriba
+  manualAddCarryRow(row, [2, 3]); row++;
+  // Número de arriba (multiplicando)
+  manualAddStaticNumberRow(row, a); row++;
+  // Símbolo ✖️ y el multiplicador
+  manualAddSymbolRow(row, '✖️', b); row++;
+  // Línea divisoria
+  manualAddLineRow(row); row++;
+
+  if(!bIsTwoDigits){
+    // Multiplicador de una cifra: una sola fila de respuesta
+    manualAddAnswerRow(row, 2, 3);
+  } else {
+    // Multiplicador de dos cifras: dos productos parciales + suma
+    manualAddAnswerRow(row, 2, 3); row++; // producto parcial 1 (a × unidades de b)
+    manualAddCarryRow(row, [2, 3]); row++; // llevadas del segundo producto parcial
+    manualAddSymbolOnly(row, '➕'); // símbolo + para indicar la suma, en la misma fila del producto 2
+    manualAddAnswerRow(row, 2, 2); row++; // producto parcial 2 (a × decenas de b), corrido una casilla a la izquierda
+    manualAddLineRow(row); row++; // línea de la suma
+    manualAddCarryRow(row, [2, 3]); row++; // llevadas de la suma final
+    manualAddAnswerRow(row, 2, 3); // resultado final
+  }
+
+  setTimeout(() => {
+    if(manualAllAnswerInputs.length) manualAllAnswerInputs[manualAllAnswerInputs.length - 1].focus();
+  }, 150);
+}
+
+let manualA = 0, manualB = 0;
+
+function openManualMultModal(){
+  if(activeIndex >= factorsOrder.length) return;
+  manualA = currentTable;
+  manualB = factorsOrder[activeIndex];
+  buildManualGrid(manualA, manualB);
+  manualMultOverlay.classList.add('show');
+}
+
+function swapManualFactors(){
+  playClick();
+  [manualA, manualB] = [manualB, manualA];
+  buildManualGrid(manualA, manualB);
+}
+
+function closeManualMultModal(){
+  manualMultOverlay.classList.remove('show');
+}
+
+manualBtn.addEventListener('click', () => {
+  playClick();
+  openManualMultModal();
+});
+manualSwapBtn.addEventListener('click', swapManualFactors);
+manualCloseBtn.addEventListener('click', () => {
+  playClick();
+  closeManualMultModal();
+});
+manualMultOverlay.addEventListener('click', (e) => {
+  if(e.target === manualMultOverlay) closeManualMultModal();
+});
+
+
+showScreen('menuScreen');
+</script>
+</body>
+</html>
