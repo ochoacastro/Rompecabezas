@@ -711,6 +711,27 @@ let celebrationTimer = null;
 let starsSequential = {}; // mejores estrellas por tabla en modo "jugar" (1-12)
 let starsManual = {}; // mejores estrellas por tabla en modo "elegir tabla"
 
+// ---- Progreso guardado (estrellas y estampillas) ----
+const PROGRESS_KEY = 'rompecabezasTablasProgreso_v1';
+function saveProgress(){
+  try{
+    const data = { starsSequential, starsManual, collectedStampsSequential, collectedStampsSingle };
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+  }catch(e){ /* almacenamiento no disponible en este navegador; se ignora */ }
+}
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(PROGRESS_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(data.starsSequential) starsSequential = data.starsSequential;
+    if(data.starsManual) starsManual = data.starsManual;
+    if(data.collectedStampsSequential) collectedStampsSequential = data.collectedStampsSequential;
+    if(data.collectedStampsSingle) collectedStampsSingle = data.collectedStampsSingle;
+  }catch(e){ /* datos guardados corruptos o no disponibles; se ignora */ }
+}
+loadProgress();
+
 // ---- Motor de sonido (tonos generados, sin archivos externos) ----
 let audioCtx = null;
 function getCtx(){
@@ -1192,10 +1213,12 @@ function onPuzzleComplete(){
   const stars = computeStars(errorCount);
   const store = gameMode === 'sequential' ? starsSequential : starsManual;
   if(stars > (store[currentTable]||0)) store[currentTable] = stars;
+  saveProgress();
 
   if(errorCount === 0){
     const result = addStampToCollection();
     pendingStampIsNew = result.isNew;
+    saveProgress();
     lightboxIsCompletionFlow = true;
     openStampLightbox(sceneImages[sceneKey], `Tabla del ${currentTable}<br>${nombresAnimales[sceneKey] || ''}`, result.color);
     pendingStars = stars;
