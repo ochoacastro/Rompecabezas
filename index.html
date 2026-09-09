@@ -491,6 +491,14 @@
     border-color:var(--sun);
     background:#fff6e0;
   }
+  .manual-answer-input.answer-red{
+    border-color:var(--coral);
+    background:#ffe9f0;
+  }
+  .manual-answer-input.answer-blue{
+    border-color:var(--sky);
+    background:#e6f7fb;
+  }
   .manual-line-row{
     border-top:3px solid var(--forest);
     margin:4px 0 6px;
@@ -1105,7 +1113,6 @@ function pickLatinVoice(){
 function speak(text){
   if(!soundOn) return;
   if(!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
   currentUtterance = new SpeechSynthesisUtterance(text);
   const latinVoice = pickLatinVoice();
   if(latinVoice){
@@ -1165,7 +1172,19 @@ const sceneImages = {
   tortuga: 'https://images.unsplash.com/photo-1496196614460-48988a57fccf?w=800&q=80&auto=format&fit=crop',
   delfin: 'https://images.unsplash.com/photo-1686080187834-bf843d798d9a?w=800&q=80&auto=format&fit=crop',
   koala: 'https://images.unsplash.com/photo-1504575958497-ccdd586c2997?w=800&q=80&auto=format&fit=crop',
-  cebra: 'https://images.unsplash.com/photo-1716750668795-7fb39ad3b298?w=800&q=80&auto=format&fit=crop'
+  cebra: 'https://images.unsplash.com/photo-1716750668795-7fb39ad3b298?w=800&q=80&auto=format&fit=crop',
+  tigre: 'https://images.unsplash.com/photo-1513714920387-b00f52df9e23?w=800&q=80&auto=format&fit=crop',
+  oso: 'https://images.unsplash.com/photo-1568162603664-fcd658421851?w=800&q=80&auto=format&fit=crop',
+  zorro: 'https://images.unsplash.com/photo-1643191317982-c12d83489b7a?w=800&q=80&auto=format&fit=crop',
+  buho: 'https://images.unsplash.com/photo-1661350356618-f5915c7b6a3c?w=800&q=80&auto=format&fit=crop',
+  pinguino: 'https://images.unsplash.com/photo-1595792419466-23cec2476fa6?w=800&q=80&auto=format&fit=crop',
+  flamenco: 'https://images.unsplash.com/photo-1774274998796-978b79613657?w=800&q=80&auto=format&fit=crop',
+  lobo: 'https://images.unsplash.com/photo-1667938318975-823e395d74d5?w=800&q=80&auto=format&fit=crop',
+  canguro: 'https://images.unsplash.com/photo-1760119199765-16c36eec0fa5?w=800&q=80&auto=format&fit=crop',
+  rinoceronte: 'https://images.unsplash.com/photo-1696145106573-b70a11f14f4d?w=800&q=80&auto=format&fit=crop',
+  gorila: 'https://images.unsplash.com/photo-1590692994802-fc18443010a3?w=800&q=80&auto=format&fit=crop',
+  foca: 'https://images.unsplash.com/photo-1652039883688-9a74ffe38281?w=800&q=80&auto=format&fit=crop',
+  mapache: 'https://images.unsplash.com/photo-1657985226591-b403cc688d06?w=800&q=80&auto=format&fit=crop'
 };
 const sceneKeys = Object.keys(sceneImages);
 // Mapeo de animal por tabla en modo "Jugar" (secuencial, tablas del 1 al 12)
@@ -1177,14 +1196,17 @@ const animalPorTablaSequential = {
 // Mapeo de animal por tabla en modo "Elegir tabla" (individual) — corrido para que
 // la misma tabla nunca muestre el mismo animal que en el modo secuencial
 const animalPorTablaSingle = {
-  1:'elefante', 2:'jirafa', 3:'mono', 4:'panda', 5:'tortuga',
-  6:'delfin', 7:'koala', 8:'cebra', 9:'gato', 10:'perro',
-  11:'tucan', 12:'leon'
+  1:'tigre', 2:'oso', 3:'zorro', 4:'buho', 5:'pinguino',
+  6:'flamenco', 7:'lobo', 8:'canguro', 9:'rinoceronte', 10:'gorila',
+  11:'foca', 12:'mapache'
 };
 const nombresAnimales = {
   gato:'gatito', perro:'perrito', tucan:'tucán', leon:'leoncito',
   elefante:'elefante', jirafa:'jirafa', mono:'mono', panda:'panda',
-  tortuga:'tortuga', delfin:'delfín', koala:'koala', cebra:'cebra'
+  tortuga:'tortuga', delfin:'delfín', koala:'koala', cebra:'cebra',
+  tigre:'tigre', oso:'oso', zorro:'zorro', buho:'búho',
+  pinguino:'pingüino', flamenco:'flamenco', lobo:'lobo', canguro:'canguro',
+  rinoceronte:'rinoceronte', gorila:'gorila', foca:'foca', mapache:'mapache'
 };
 let sceneKey = animalPorTablaSequential[3];
 
@@ -1721,22 +1743,12 @@ function manualAddStaticNumberRow(row, value, toggleable, hasSecondRound){
         playClick();
         const doneClass = manualDigitRound === 0 ? 'manual-digit-done' : 'manual-digit-done2';
         cell.classList.toggle(doneClass);
-        if(hasSecondRound) manualCheckRoundComplete();
       });
     }
   }
 }
 
-// Cuando se completan todos los dígitos de arriba en la ronda 1 (color rosa),
-// los limpia solos y cambia a la ronda 2 (color celeste) para el segundo dígito del multiplicador.
-function manualCheckRoundComplete(){
-  if(manualDigitRound !== 0 || !manualTopToggleCells.length) return;
-  const allDone = manualTopToggleCells.every(c => c.classList.contains('manual-digit-done'));
-  if(!allDone) return;
-  setTimeout(() => {
-    manualSelectRound(1);
-  }, 450);
-}
+
 
 function manualAddSymbolRow(row, symbol, value, hasSecondRound){
   const symCell = manualMakeCell(1, row, 'manual-op-cell');
@@ -1789,7 +1801,7 @@ function manualAddLineRow(row){
 }
 
 let manualAllAnswerInputs = [];
-function manualAddAnswerRow(row, startCol, width){
+function manualAddAnswerRow(row, startCol, width, extraClass){
   const inputs = [];
   for(let col = 2; col <= 4; col++){
     const cell = manualMakeCell(col, row);
@@ -1799,7 +1811,7 @@ function manualAddAnswerRow(row, startCol, width){
       inp.inputMode = 'none';
       inp.readOnly = true;
       inp.maxLength = 1;
-      inp.className = 'manual-answer-input';
+      inp.className = 'manual-answer-input' + (extraClass ? ' ' + extraClass : '');
       inp.setAttribute('aria-label', 'Dígito de la respuesta');
       cell.appendChild(inp);
       inputs.push(inp);
@@ -1842,10 +1854,10 @@ function buildManualGrid(a, b){
     manualAddAnswerRow(row, 2, 3);
   } else {
     // Multiplicador de dos cifras: dos productos parciales + suma
-    manualAddAnswerRow(row, 2, 3); row++; // producto parcial 1 (a × unidades de b)
+    manualAddAnswerRow(row, 2, 3, 'answer-red'); row++; // producto parcial 1 (a × unidades de b)
     manualAddCarryRow(row, [2, 3], 'mid'); row++; // llevadas del segundo producto parcial
     manualAddSymbolOnly(row, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'); // símbolo + para indicar la suma, en la misma fila del producto 2
-    manualAddAnswerRow(row, 2, 2); row++; // producto parcial 2 (a × decenas de b), corrido una casilla a la izquierda
+    manualAddAnswerRow(row, 2, 2, 'answer-blue'); row++; // producto parcial 2 (a × decenas de b), corrido una casilla a la izquierda
     manualAddLineRow(row); row++; // línea de la suma
     manualAddCarryRow(row, [2, 3], 'sum'); row++; // llevadas de la suma final
     manualAddAnswerRow(row, 2, 3); // resultado final
