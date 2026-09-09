@@ -580,7 +580,7 @@
       </div>
     </div>
 
-    <div class="equation-row">
+    <div class="equation-row" id="equationRow">
       <div class="equation-bar" id="equationBar">&nbsp;</div>
       <button class="manual-btn" id="manualBtn" title="Multiplicar manualmente" style="display:none;">✏️</button>
       <button class="reroll-btn" id="rerollBtn" title="Cambiar pregunta">🔃</button>
@@ -620,6 +620,7 @@
 <script>
 const gridEl = document.getElementById('grid');
 const equationBarEl = document.getElementById('equationBar');
+const equationRowEl = document.getElementById('equationRow');
 const messageEl = document.getElementById('message');
 const scoreCountEl = document.getElementById('scoreCount');
 const currentTableEl = document.getElementById('currentTable');
@@ -923,6 +924,7 @@ function updateEquationBar(){
   equationBarEl.innerHTML = `${currentTable} × ${f} = <span class="equation-blank">?</span>`;
   manualBtn.style.display = (currentTable >= 10 || f >= 10) ? '' : 'none';
   speakQuestion(currentTable, f);
+  equationRowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function onTileClick(tile){
