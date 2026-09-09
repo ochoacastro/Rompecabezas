@@ -62,6 +62,7 @@
     border-radius:14px;
     cursor:pointer;
     font-weight:700;
+    text-align:center;
     box-shadow:0 3px 0 #c9c2a8;
     transition:transform .12s;
   }
@@ -123,24 +124,36 @@
     margin-bottom:16px;
   }
   .table-card{
-    display:flex; flex-direction:column; align-items:center; gap:5px;
-    background:#ffffff14;
-    border:2px solid #ffffff20;
-    border-radius:14px;
-    padding:10px 4px 12px;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    background:linear-gradient(160deg, #ffffff22 0%, #ffffff0d 100%);
+    border:2px solid #ffffff25;
+    border-radius:18px;
+    padding:14px 4px 12px;
     cursor:pointer;
+    box-shadow:0 3px 0 rgba(0,0,0,0.22);
     transition:transform .12s;
   }
-  .table-card:active{ transform:translateY(2px); }
+  .table-card:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,0.22); }
   .table-card.active{
     border-color:var(--sun);
-    background:#ffffff28;
+    background:linear-gradient(160deg, #ffffff30 0%, #ffffff16 100%);
+    box-shadow:0 3px 0 #cc9a2f;
   }
   .table-card .chip{
-    width:100%;
-    box-shadow:none;
+    width:52px; height:52px;
+    border-radius:50%;
+    background:linear-gradient(160deg,#ffffff 0%, #f2ead2 100%);
+    color:var(--forest);
+    font-size:22px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 0 rgba(27,67,50,0.3), 0 4px 6px rgba(0,0,0,0.2);
     pointer-events:none;
-    padding:8px 0;
+    padding:0;
+    margin:0 0 2px;
+  }
+  .table-card.active .chip{
+    background:linear-gradient(160deg, var(--sun) 0%, #ffd76b 100%);
+    box-shadow:0 3px 0 #cc9a2f, 0 4px 6px rgba(0,0,0,0.25);
   }
   .stars-line{
     font-size:11px;
