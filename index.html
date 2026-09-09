@@ -562,14 +562,191 @@
   @keyframes fall{
     to{ transform:translateY(110vh) rotate(540deg); opacity:0.9; }
   }
+
+  /* ---- Pantalla de intro ---- */
+  .intro-screen{
+    position:fixed; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255,93,143,0.30) 0%, transparent 42%),
+      radial-gradient(circle at 88% 14%, rgba(34,211,238,0.28) 0%, transparent 44%),
+      radial-gradient(circle at 50% 105%, rgba(139,92,246,0.35) 0%, transparent 55%),
+      linear-gradient(160deg, var(--forest) 0%, var(--forest-deep) 100%);
+    z-index:100;
+    cursor:pointer;
+    padding:24px;
+  }
+  .intro-emoji{
+    font-size:64px;
+    margin-bottom:6px;
+    animation: intro-bounce 1.6s ease-in-out infinite;
+  }
+  .intro-title{
+    font-family:'Baloo 2', sans-serif;
+    color:var(--cream);
+    font-size:clamp(26px,8vw,40px);
+    margin:6px 0 8px;
+    text-shadow:0 3px 0 rgba(0,0,0,0.3), 0 0 22px rgba(255,93,143,0.35);
+    opacity:0;
+    animation: intro-fade-up .7s ease-out .2s forwards;
+  }
+  .intro-subtitle{
+    color:var(--leaf-light);
+    font-weight:700;
+    font-size:15px;
+    max-width:280px;
+    margin:0 0 26px;
+    opacity:0;
+    animation: intro-fade-up .7s ease-out .6s forwards;
+  }
+  .intro-animals{
+    font-size:30px;
+    letter-spacing:10px;
+    margin-bottom:26px;
+    opacity:0;
+    animation: intro-fade-up .7s ease-out 1s forwards;
+  }
+  .intro-tap{
+    color:var(--cream);
+    opacity:0;
+    font-size:13px;
+    font-weight:700;
+    animation: intro-fade-up .6s ease-out 1.6s forwards, intro-pulse 1.4s ease-in-out 1.6s infinite;
+  }
+  @keyframes intro-bounce{
+    0%,100%{ transform:translateY(0); }
+    50%{ transform:translateY(-10px); }
+  }
+  @keyframes intro-fade-up{
+    from{ opacity:0; transform:translateY(14px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes intro-pulse{
+    0%,100%{ opacity:.5; }
+    50%{ opacity:1; }
+  }
+
+  /* ---- Pantalla de perfiles ---- */
+  .profile-list{
+    display:flex; flex-direction:column; gap:10px;
+    margin-bottom:16px;
+  }
+  .profile-card{
+    display:flex; align-items:center; gap:12px;
+    background:linear-gradient(160deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 100%);
+    border:2px solid rgba(255,255,255,0.2);
+    border-radius:18px;
+    padding:10px 14px;
+    cursor:pointer;
+    box-shadow:0 3px 0 rgba(0,0,0,0.25), 0 6px 12px rgba(20,11,50,0.3);
+    transition:transform .12s;
+  }
+  .profile-card:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(0,0,0,0.25); }
+  .profile-card .profile-avatar{
+    width:44px; height:44px; border-radius:50%;
+    background:linear-gradient(160deg,#ffffff 0%, #ffe6c2 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; flex-shrink:0;
+    box-shadow:0 3px 0 rgba(36,23,81,0.35);
+  }
+  .profile-card .profile-name{
+    font-family:'Baloo 2',sans-serif;
+    color:var(--cream);
+    font-size:17px;
+    flex:1;
+    text-align:left;
+  }
+  .profile-card .profile-delete{
+    background:none; border:none; color:var(--leaf-light);
+    font-size:18px; cursor:pointer; padding:6px;
+    flex-shrink:0;
+  }
+  .profile-empty-note{
+    color:var(--leaf-light);
+    text-align:center;
+    font-size:13px;
+    margin:0 0 14px;
+  }
+  .avatar-grid{
+    display:grid; grid-template-columns:repeat(6,1fr); gap:8px;
+    margin-bottom:16px;
+  }
+  .avatar-btn{
+    font-size:22px;
+    background:rgba(255,255,255,0.08);
+    border:2px solid rgba(255,255,255,0.25);
+    border-radius:14px;
+    padding:8px 0;
+    cursor:pointer;
+  }
+  .avatar-btn.active{
+    border-color:var(--sun);
+    background:rgba(255,200,87,0.25);
+  }
+  .profile-name-input{
+    width:100%;
+    font-family:'Nunito',sans-serif;
+    font-size:16px;
+    padding:12px 14px;
+    border-radius:14px;
+    border:2px solid rgba(255,255,255,0.3);
+    background:rgba(255,255,255,0.92);
+    color:var(--ink);
+    margin-bottom:14px;
+    box-sizing:border-box;
+  }
+  .current-profile-bar{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    color:var(--leaf-light);
+    font-size:16px;
+    font-weight:700;
+    margin:-4px 0 16px;
+    flex-wrap:wrap;
+  }
+  .current-profile-bar .profile-avatar-emoji{
+    font-size:26px;
+    line-height:1;
+  }
+  .current-profile-bar button{
+    background:none; border:none; color:var(--sky);
+    font-weight:700; font-size:16px; cursor:pointer;
+    text-decoration:underline;
+    padding:6px 4px;
+  }
 </style>
 </head>
 <body>
+
+<div class="intro-screen" id="introScreen">
+  <div class="intro-emoji">🐒</div>
+  <h1 class="intro-title">Rompecabezas de las Tablas</h1>
+  <p class="intro-subtitle">Arma el rompecabezas, resuelve las multiplicaciones y descubre al animalito escondido</p>
+  <div class="intro-animals">🐱 🐘 🦒 🐢 🐬</div>
+  <p class="intro-tap">Toca la pantalla para continuar</p>
+</div>
+
 <div class="wrap">
   <h1>🐒 Rompecabezas de las Tablas 🐒</h1>
   <p class="subtitle">Cada tabla tiene su propio animalito escondido</p>
 
-  <div id="menuScreen" class="screen">
+  <div id="profileScreen" class="screen" style="display:none;">
+    <p class="menu-title" id="profileScreenTitle">¿Quién va a jugar?</p>
+    <div class="profile-list" id="profileListEl"></div>
+    <p class="profile-empty-note" id="profileEmptyNote" style="display:none;">Todavía no hay perfiles. ¡Crea el primero!</p>
+    <button id="profileNewBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5a1 1 0 011 1v5h5a1 1 0 010 2h-5v5a1 1 0 01-2 0v-5H6a1 1 0 010-2h5V6a1 1 0 011-1z"/></svg> Crear nuevo perfil</button>
+  </div>
+
+  <div id="profileCreateScreen" class="screen" style="display:none;">
+    <p class="menu-title">Crea tu perfil</p>
+    <input type="text" id="profileNameInput" class="profile-name-input" placeholder="Escribe tu nombre" maxlength="16">
+    <div class="avatar-grid" id="avatarGridEl"></div>
+    <button id="profileCreateConfirmBtn" class="menu-btn">Crear y jugar</button>
+    <button id="profileCreateBackBtn" class="menu-btn secondary"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Regresar</button>
+  </div>
+
+  <div id="menuScreen" class="screen" style="display:none;">
+    <p class="current-profile-bar"><span id="currentProfileLabel"></span> · <button id="switchProfileBtn">Cerrar sesión</button></p>
     <button id="menuPlayBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg> Jugar (tablas del 1 al 12)</button>
     <button id="menuSelectBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg> Elegir una tabla</button>
     <button id="menuStampsBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v1.5a1.5 1.5 0 000 3V14a2 2 0 01-2 2H5a2 2 0 01-2-2v-1.5a1.5 1.5 0 000-3V8z"/><line x1="9" y1="6" x2="9" y2="16" stroke-dasharray="2,2"/></svg> Ver mis estampillas</button>
@@ -671,10 +848,22 @@ const overlayNoteEl = document.getElementById('overlayNote');
 const sceneEl = document.getElementById('scene');
 const sceneWrapEl = document.getElementById('sceneWrap');
 
+const introScreenEl = document.getElementById('introScreen');
+const profileScreenEl = document.getElementById('profileScreen');
+const profileCreateScreenEl = document.getElementById('profileCreateScreen');
 const menuScreenEl = document.getElementById('menuScreen');
 const selectTableScreenEl = document.getElementById('selectTableScreen');
 const stampsScreenEl = document.getElementById('stampsScreen');
 const gameScreenEl = document.getElementById('gameScreen');
+const profileListEl = document.getElementById('profileListEl');
+const profileEmptyNote = document.getElementById('profileEmptyNote');
+const profileNewBtn = document.getElementById('profileNewBtn');
+const profileNameInput = document.getElementById('profileNameInput');
+const avatarGridEl = document.getElementById('avatarGridEl');
+const profileCreateConfirmBtn = document.getElementById('profileCreateConfirmBtn');
+const profileCreateBackBtn = document.getElementById('profileCreateBackBtn');
+const currentProfileLabel = document.getElementById('currentProfileLabel');
+const switchProfileBtn = document.getElementById('switchProfileBtn');
 const menuPlayBtn = document.getElementById('menuPlayBtn');
 const menuSelectBtn = document.getElementById('menuSelectBtn');
 const menuStampsBtn = document.getElementById('menuStampsBtn');
@@ -711,17 +900,45 @@ let celebrationTimer = null;
 let starsSequential = {}; // mejores estrellas por tabla en modo "jugar" (1-12)
 let starsManual = {}; // mejores estrellas por tabla en modo "elegir tabla"
 
-// ---- Progreso guardado (estrellas y estampillas) ----
-const PROGRESS_KEY = 'rompecabezasTablasProgreso_v1';
-function saveProgress(){
+// ---- Perfiles de jugador (cada uno con su propio progreso) ----
+const PROFILES_KEY = 'rompecabezasTablasPerfiles_v1';
+const AVATAR_OPTIONS = ['🐱','🐶','🐰','🦁','🐼','🐵','🐸','🦋','🐢','🐬','🦄','⭐'];
+let profiles = [];
+let activeProfileId = null;
+let selectedAvatar = AVATAR_OPTIONS[0];
+
+function loadProfiles(){
   try{
-    const data = { starsSequential, starsManual, collectedStampsSequential, collectedStampsSingle };
-    localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+    const raw = localStorage.getItem(PROFILES_KEY);
+    profiles = raw ? JSON.parse(raw) : [];
+  }catch(e){ profiles = []; }
+}
+function saveProfiles(){
+  try{
+    localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
   }catch(e){ /* almacenamiento no disponible en este navegador; se ignora */ }
 }
-function loadProgress(){
+function progressKeyFor(id){ return 'rompecabezasTablasProgreso_v1_' + id; }
+
+// ---- Progreso guardado (estrellas y estampillas), del perfil activo ----
+function saveProgress(){
+  if(!activeProfileId) return;
   try{
-    const raw = localStorage.getItem(PROGRESS_KEY);
+    const data = { starsSequential, starsManual, collectedStampsSequential, collectedStampsSingle };
+    localStorage.setItem(progressKeyFor(activeProfileId), JSON.stringify(data));
+  }catch(e){ /* almacenamiento no disponible en este navegador; se ignora */ }
+}
+function resetProgressState(){
+  starsSequential = {};
+  starsManual = {};
+  collectedStampsSequential = {};
+  collectedStampsSingle = {};
+}
+function loadProgress(){
+  resetProgressState();
+  if(!activeProfileId) return;
+  try{
+    const raw = localStorage.getItem(progressKeyFor(activeProfileId));
     if(!raw) return;
     const data = JSON.parse(raw);
     if(data.starsSequential) starsSequential = data.starsSequential;
@@ -730,7 +947,7 @@ function loadProgress(){
     if(data.collectedStampsSingle) collectedStampsSingle = data.collectedStampsSingle;
   }catch(e){ /* datos guardados corruptos o no disponibles; se ignora */ }
 }
-loadProgress();
+loadProfiles();
 
 // ---- Motor de sonido (tonos generados, sin archivos externos) ----
 let audioCtx = null;
@@ -923,9 +1140,9 @@ function buildSelectTableScreen(){
 }
 buildSelectTableScreen();
 
-// ---- Navegación entre pantallas (menú / elegir tabla / estampillas / juego) ----
+// ---- Navegación entre pantallas (perfiles / menú / elegir tabla / estampillas / juego) ----
 function showScreen(id){
-  [menuScreenEl, selectTableScreenEl, stampsScreenEl, gameScreenEl].forEach(el=>{
+  [profileScreenEl, profileCreateScreenEl, menuScreenEl, selectTableScreenEl, stampsScreenEl, gameScreenEl].forEach(el=>{
     el.style.display = (el.id === id) ? '' : 'none';
   });
 }
@@ -933,6 +1150,103 @@ function goToMenu(){
   overlay.classList.remove('show');
   showScreen('menuScreen');
 }
+
+// ---- Pantalla de intro: animada y se puede saltar tocando ----
+function dismissIntro(){
+  introScreenEl.removeEventListener('click', dismissIntro);
+  introScreenEl.style.display = 'none';
+  showScreen('profileScreen');
+  renderProfileList();
+}
+introScreenEl.addEventListener('click', dismissIntro);
+setTimeout(() => {
+  if(introScreenEl.style.display !== 'none') dismissIntro();
+}, 4200);
+
+// ---- Pantalla de perfiles: elegir o crear ----
+function renderProfileList(){
+  profileListEl.innerHTML = '';
+  profileEmptyNote.style.display = profiles.length === 0 ? '' : 'none';
+  profiles.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'profile-card';
+    card.innerHTML = `
+      <div class="profile-avatar">${p.avatar}</div>
+      <div class="profile-name">${p.name}</div>
+      <button class="profile-delete" title="Eliminar perfil">✕</button>
+    `;
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.profile-delete')) return;
+      playClick();
+      selectProfile(p.id);
+    });
+    card.querySelector('.profile-delete').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      playClick();
+      if(confirm(`¿Eliminar el perfil de ${p.name}? Se perderá su progreso.`)){
+        try{ localStorage.removeItem(progressKeyFor(p.id)); }catch(err){}
+        profiles = profiles.filter(x => x.id !== p.id);
+        saveProfiles();
+        renderProfileList();
+      }
+    });
+    profileListEl.appendChild(card);
+  });
+}
+function selectProfile(id){
+  activeProfileId = id;
+  loadProgress();
+  const p = profiles.find(x => x.id === id);
+  currentProfileLabel.innerHTML = p ? `Jugando como <span class="profile-avatar-emoji">${p.avatar}</span> ${p.name}` : '';
+  showScreen('menuScreen');
+}
+function renderAvatarGrid(){
+  avatarGridEl.innerHTML = '';
+  AVATAR_OPTIONS.forEach(a => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'avatar-btn' + (a === selectedAvatar ? ' active' : '');
+    btn.textContent = a;
+    btn.addEventListener('click', ()=>{
+      playClick();
+      selectedAvatar = a;
+      renderAvatarGrid();
+    });
+    avatarGridEl.appendChild(btn);
+  });
+}
+
+profileNewBtn.addEventListener('click', ()=>{
+  playClick();
+  profileNameInput.value = '';
+  selectedAvatar = AVATAR_OPTIONS[Math.floor(Math.random()*AVATAR_OPTIONS.length)];
+  renderAvatarGrid();
+  showScreen('profileCreateScreen');
+});
+profileCreateBackBtn.addEventListener('click', ()=>{
+  playClick();
+  showScreen('profileScreen');
+});
+profileCreateConfirmBtn.addEventListener('click', ()=>{
+  const name = profileNameInput.value.trim();
+  if(!name){ profileNameInput.focus(); return; }
+  playClick();
+  const newProfile = { id: 'p_' + Date.now() + '_' + Math.floor(Math.random()*1000), name, avatar: selectedAvatar };
+  profiles.push(newProfile);
+  saveProfiles();
+  selectProfile(newProfile.id);
+});
+function logoutProfile(){
+  activeProfileId = null;
+  resetProgressState();
+  currentProfileLabel.textContent = '';
+  renderProfileList();
+  showScreen('profileScreen');
+}
+switchProfileBtn.addEventListener('click', ()=>{
+  playClick();
+  logoutProfile();
+});
 
 menuPlayBtn.addEventListener('click', ()=>{
   playClick();
@@ -1378,7 +1692,8 @@ manualMultOverlay.addEventListener('click', (e) => {
 });
 
 
-showScreen('menuScreen');
+// La pantalla inicial es la intro (introScreen ya está visible por defecto en el HTML);
+// tras tocarla o pasados unos segundos, se muestra la pantalla de perfiles.
 </script>
 </body>
 </html>
