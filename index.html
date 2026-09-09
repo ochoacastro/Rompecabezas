@@ -298,6 +298,16 @@
     margin-top:10px;
   }
 
+  .stamp-section-title{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    margin:14px 0 6px;
+    text-align:center;
+  }
+  .stamp-section-title.seq{ color:#ffd166; }
+  .stamp-section-title.manual{ color:#7fd1ff; }
+
   .stamp-collection{
     display:flex; flex-wrap:nowrap; gap:14px;
     align-items:center;
@@ -538,9 +548,17 @@
 
   <div id="stampsScreen" class="screen" style="display:none;">
     <p class="menu-title">🎫 Mi colección de estampillas</p>
-    <div class="stamp-collection" id="stampCollectionView">
-      <p class="stamp-empty" id="stampEmptyView">Todavía no tienes estampillas. ¡Completa una tabla sin errores para ganar la primera!</p>
+
+    <p class="stamp-section-title seq">⭐ Modo Jugar (tablas del 1 al 12)</p>
+    <div class="stamp-collection" id="stampCollectionViewSeq">
+      <p class="stamp-empty">Todavía no tienes estampillas en este modo. ¡Completa una tabla sin errores para ganar la primera!</p>
     </div>
+
+    <p class="stamp-section-title manual">★ Modo Elegir tabla</p>
+    <div class="stamp-collection" id="stampCollectionViewSingle">
+      <p class="stamp-empty">Todavía no tienes estampillas en este modo. ¡Completa una tabla sin errores para ganar la primera!</p>
+    </div>
+
     <button id="stampsBackBtn" class="menu-btn secondary" style="margin-top:14px;">⬅️ Regresar al menú</button>
   </div>
 
@@ -623,7 +641,8 @@ const selectChipsEl = document.getElementById('selectChips');
 const selectPlayBtn = document.getElementById('selectPlayBtn');
 const selectBackBtn = document.getElementById('selectBackBtn');
 const stampsBackBtn = document.getElementById('stampsBackBtn');
-const stampCollectionViewEl = document.getElementById('stampCollectionView');
+const stampCollectionViewSeqEl = document.getElementById('stampCollectionViewSeq');
+const stampCollectionViewSingleEl = document.getElementById('stampCollectionViewSingle');
 const gameMenuBtn = document.getElementById('gameMenuBtn');
 const nextTableBtn = document.getElementById('nextTableBtn');
 const retryBtn = document.getElementById('retryBtn');
@@ -637,9 +656,11 @@ const manualSwapBtn = document.getElementById('manualSwapBtn');
 let currentTable = 3;
 let selectedTable = 1;
 let gameMode = 'sequential'; // 'sequential' (jugar 1-12) o 'single' (tabla elegida)
-let collectedStamps = [];
+let collectedStampsSequential = {}; // estampillas del modo "jugar" (1-12): una por tabla, sin duplicar
+let collectedStampsSingle = {}; // estampillas del modo "elegir tabla": una por tabla, sin duplicar
 let lightboxIsCompletionFlow = false;
 let pendingStars = 0;
+let pendingStampIsNew = false;
 let factorsOrder = [];
 let activeIndex = 0;
 let solvedCount = 0;
@@ -688,7 +709,7 @@ function speakQuestion(table, f){
   speak(`${table} por ${f}`);
 }
 function speakCorrect(table, f, answer){
-  speak(`Correcto`);
+  speak(`${answer}`);
 }
 function speakWrong(answer){
   speak(`Incorrecto`);
@@ -1009,24 +1030,34 @@ function makeStampEl(data){
 }
 
 function addStampToCollection(){
+  const store = gameMode === 'sequential' ? collectedStampsSequential : collectedStampsSingle;
+  if(store[currentTable]){
+    return { color: store[currentTable].color, isNew: false };
+  }
   const color = nextStampColor();
   const imgSrc = sceneImages[sceneKey];
   const labelHtml = `Tabla del ${currentTable}<br>${nombresAnimales[sceneKey] || ''}`;
   const data = { imgSrc, labelHtml, color, alt: nombresAnimales[sceneKey] || '' };
-  collectedStamps.push(data);
-  return color;
+  store[currentTable] = data;
+  return { color, isNew: true };
+}
+
+function renderCollectionInto(container, store){
+  container.innerHTML = '';
+  const tables = Object.keys(store).map(Number).sort((a,b)=>a-b);
+  if(tables.length === 0){
+    const p = document.createElement('p');
+    p.className = 'stamp-empty';
+    p.textContent = 'Todavía no tienes estampillas en este modo. ¡Completa una tabla sin errores para ganar la primera!';
+    container.appendChild(p);
+    return;
+  }
+  tables.forEach(t => container.appendChild(makeStampEl(store[t])));
 }
 
 function renderStampsView(){
-  stampCollectionViewEl.innerHTML = '';
-  if(collectedStamps.length === 0){
-    const p = document.createElement('p');
-    p.className = 'stamp-empty';
-    p.textContent = 'Todavía no tienes estampillas. ¡Completa una tabla para ganar la primera!';
-    stampCollectionViewEl.appendChild(p);
-    return;
-  }
-  collectedStamps.forEach(data => stampCollectionViewEl.appendChild(makeStampEl(data)));
+  renderCollectionInto(stampCollectionViewSeqEl, collectedStampsSequential);
+  renderCollectionInto(stampCollectionViewSingleEl, collectedStampsSingle);
 }
 
 function nextTable(){
@@ -1045,7 +1076,9 @@ function showChoiceOverlay(stars){
   const starClass = gameMode === 'sequential' ? 'seq' : 'manual';
   overlayStarsEl.innerHTML = starsHtml(stars, gameMode === 'sequential' ? '⭐' : '★', starClass);
   if(stars === 3){
-    overlayNoteEl.textContent = '¡Sin errores! Ganaste una estampilla nueva 🎫';
+    overlayNoteEl.textContent = pendingStampIsNew
+      ? '¡Sin errores! Ganaste una estampilla nueva 🎫'
+      : '¡Sin errores! Ya tenías esta estampilla en tu colección 🎫';
   } else if(errorCount === 0){
     overlayNoteEl.textContent = '';
   } else {
@@ -1061,9 +1094,10 @@ function onPuzzleComplete(){
   if(stars > (store[currentTable]||0)) store[currentTable] = stars;
 
   if(errorCount === 0){
-    const color = addStampToCollection();
+    const result = addStampToCollection();
+    pendingStampIsNew = result.isNew;
     lightboxIsCompletionFlow = true;
-    openStampLightbox(sceneImages[sceneKey], `Tabla del ${currentTable}<br>${nombresAnimales[sceneKey] || ''}`, color);
+    openStampLightbox(sceneImages[sceneKey], `Tabla del ${currentTable}<br>${nombresAnimales[sceneKey] || ''}`, result.color);
     pendingStars = stars;
   } else {
     showChoiceOverlay(stars);
