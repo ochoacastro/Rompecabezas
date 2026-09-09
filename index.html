@@ -703,14 +703,33 @@ function playClick(){
 }
 
 // ---- Voz (lee la pregunta y la respuesta en voz alta) ----
+let currentUtterance = null;
+function pickLatinVoice(){
+  if(!('speechSynthesis' in window)) return null;
+  const voices = window.speechSynthesis.getVoices();
+  const latinVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('es') && v.lang.toLowerCase() !== 'es-es');
+  if(latinVoices.length === 0) return null;
+  const nameKeywords = ['paulina', 'juan', 'sabina', 'raul', 'raúl', 'mexico', 'méxico', 'estados unidos', 'latin'];
+  const byName = latinVoices.find(v => nameKeywords.some(k => v.name.toLowerCase().includes(k)));
+  if(byName) return byName;
+  // Si hay más de una voz latina disponible, se toma la última de la lista para variar respecto a la voz anterior
+  return latinVoices.length > 1 ? latinVoices[latinVoices.length - 1] : latinVoices[0];
+}
 function speak(text){
   if(!soundOn) return;
   if(!('speechSynthesis' in window)) return;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'es-ES';
-  utter.rate = 0.92;
-  utter.pitch = 1.05;
-  window.speechSynthesis.speak(utter);
+  window.speechSynthesis.cancel();
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  const latinVoice = pickLatinVoice();
+  if(latinVoice){
+    currentUtterance.voice = latinVoice;
+    currentUtterance.lang = latinVoice.lang;
+  } else {
+    currentUtterance.lang = 'es-US';
+  }
+  currentUtterance.rate = 0.92;
+  currentUtterance.pitch = 1.05;
+  window.speechSynthesis.speak(currentUtterance);
 }
 function speakQuestion(table, f){
   speak(`${table} por ${f}`);
@@ -959,7 +978,13 @@ equationBarEl.addEventListener('click', () => {
   if(!equationBarEl.querySelector('.equation-blank')) return;
   playClick();
   equationReversed = !equationReversed;
-  renderEquationBar(factorsOrder[activeIndex]);
+  const f = factorsOrder[activeIndex];
+  renderEquationBar(f);
+  if(equationReversed){
+    speakQuestion(f, currentTable);
+  } else {
+    speakQuestion(currentTable, f);
+  }
 });
 
 function onTileClick(tile){
