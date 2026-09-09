@@ -261,8 +261,11 @@
     color:var(--coral);
   }
   .equation-row{
-    display:flex; align-items:center; justify-content:center; gap:10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
     margin:16px 0 4px;
+  }
+  .equation-buttons{
+    display:flex; align-items:center; justify-content:center; gap:10px;
   }
   .reroll-btn{
     font-size:24px;
@@ -582,8 +585,10 @@
 
     <div class="equation-row" id="equationRow">
       <div class="equation-bar" id="equationBar">&nbsp;</div>
-      <button class="manual-btn" id="manualBtn" title="Multiplicar manualmente" style="display:none;">✏️</button>
-      <button class="reroll-btn" id="rerollBtn" title="Cambiar pregunta">🔃</button>
+      <div class="equation-buttons">
+        <button class="manual-btn" id="manualBtn" title="Multiplicar manualmente" style="display:none;">✏️</button>
+        <button class="reroll-btn" id="rerollBtn" title="Cambiar pregunta">🔃</button>
+      </div>
     </div>
 
     <div class="message" id="message">&nbsp;</div>
@@ -621,6 +626,7 @@
 const gridEl = document.getElementById('grid');
 const equationBarEl = document.getElementById('equationBar');
 const equationRowEl = document.getElementById('equationRow');
+let equationReversed = false;
 const messageEl = document.getElementById('message');
 const scoreCountEl = document.getElementById('scoreCount');
 const currentTableEl = document.getElementById('currentTable');
@@ -927,14 +933,34 @@ function buildRound(){
   updateEquationBar();
 }
 
+function renderEquationBar(f, target){
+  const first = equationReversed ? f : currentTable;
+  const second = equationReversed ? currentTable : f;
+  equationBarEl.innerHTML = (target === undefined)
+    ? `${first} × ${second} = <span class="equation-blank">?</span>`
+    : `${first} × ${second} = ${target}`;
+}
+
 function updateEquationBar(){
   if(activeIndex >= factorsOrder.length) return;
   const f = factorsOrder[activeIndex];
-  equationBarEl.innerHTML = `${currentTable} × ${f} = <span class="equation-blank">?</span>`;
+  equationReversed = false;
+  renderEquationBar(f);
   manualBtn.style.display = (currentTable >= 10 || f >= 10) ? '' : 'none';
   speakQuestion(currentTable, f);
-  equationRowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => {
+    equationRowEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 80);
 }
+
+equationBarEl.style.cursor = 'pointer';
+equationBarEl.addEventListener('click', () => {
+  if(activeIndex >= factorsOrder.length) return;
+  if(!equationBarEl.querySelector('.equation-blank')) return;
+  playClick();
+  equationReversed = !equationReversed;
+  renderEquationBar(factorsOrder[activeIndex]);
+});
 
 function onTileClick(tile){
   if(tile.classList.contains('solved')) return;
@@ -947,7 +973,7 @@ function onTileClick(tile){
     tile.classList.add('solved');
     solvedCount++;
     scoreCountEl.textContent = solvedCount;
-    equationBarEl.innerHTML = `${currentTable} × ${f} = ${target}`;
+    renderEquationBar(f, target);
     messageEl.textContent = `¡Correcto! 🎈`;
     playCorrect();
     speakCorrect(currentTable, f, target);
