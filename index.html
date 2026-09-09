@@ -461,9 +461,26 @@
   .manual-grid{
     display:inline-grid;
     grid-template-columns:40px repeat(3, 54px);
-    row-gap:10px;
+    row-gap:6px;
     justify-content:center;
+    position:relative;
   }
+  .manual-seq-overlay{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    overflow:visible;
+    pointer-events:none;
+    z-index:2;
+  }
+  .manual-seq-line{
+    stroke-width:4;
+    stroke-linecap:round;
+  }
+  .manual-seq-line.round0{ stroke:var(--coral); }
+  .manual-seq-line.round1{ stroke:var(--sky); }
+  .manual-seq-clickable{ cursor:pointer; }
   .manual-cell{
     display:flex; align-items:center; justify-content:center;
     font-family:'Baloo 2',sans-serif;
@@ -501,7 +518,7 @@
   }
   .manual-line-row{
     border-top:3px solid var(--forest);
-    margin:4px 0 6px;
+    margin:2px 0 3px;
   }
   .manual-digit-toggle{
     cursor:pointer;
@@ -542,7 +559,7 @@
   }
   .manual-swap-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--leaf-light); }
 
-  .manual-carry-check-cell{ height:34px; }
+  .manual-carry-check-cell{ height:28px; }
   .carry-check-label{
     position:relative;
     width:26px; height:26px;
@@ -584,41 +601,6 @@
     display:flex; align-items:center; justify-content:center;
     gap:14px;
     margin:0 0 2px;
-  }
-  .digit-tray{
-    display:flex; flex-direction:column; gap:12px;
-    flex-shrink:0;
-  }
-  .digit-chip{
-    width:46px; height:46px;
-    border-radius:50%;
-    border:2px solid var(--leaf-light);
-    background:linear-gradient(160deg,#ffffff 0%, #fff1da 100%);
-    color:var(--forest);
-    font-family:'Baloo 2',sans-serif;
-    font-weight:800;
-    font-size:20px;
-    display:flex; align-items:center; justify-content:center;
-    cursor:grab;
-    touch-action:none;
-    user-select:none;
-    -webkit-user-select:none;
-    box-shadow:0 2px 0 #b9a6e0;
-    padding:0;
-  }
-  .digit-chip:active{ cursor:grabbing; }
-  .digit-ghost{
-    position:fixed;
-    top:0; left:0;
-    z-index:999;
-    pointer-events:none;
-    transform:translate(-50%,-50%) scale(1.2);
-    opacity:0.92;
-    box-shadow:0 6px 14px rgba(20,11,50,0.4);
-  }
-  .manual-answer-input.drop-hover, .manual-carry-input.drop-hover{
-    outline:3px solid var(--coral);
-    outline-offset:1px;
   }
 
   .celebrate-overlay{
@@ -935,21 +917,7 @@
   <div class="manual-mult-card">
     <div class="manual-mult-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 21l1.5-5.5L15.5 4.5a1.5 1.5 0 012.12 0l1.88 1.88a1.5 1.5 0 010 2.12L8.5 19.5 3 21z"/><line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/></svg> Multiplicación manual</div>
     <div class="manual-work-area">
-      <div class="digit-tray" id="digitTrayLeft">
-        <button class="digit-chip" type="button" data-digit="0">0</button>
-        <button class="digit-chip" type="button" data-digit="1">1</button>
-        <button class="digit-chip" type="button" data-digit="2">2</button>
-        <button class="digit-chip" type="button" data-digit="3">3</button>
-        <button class="digit-chip" type="button" data-digit="4">4</button>
-      </div>
       <div class="manual-grid" id="manualGrid"></div>
-      <div class="digit-tray" id="digitTrayRight">
-        <button class="digit-chip" type="button" data-digit="5">5</button>
-        <button class="digit-chip" type="button" data-digit="6">6</button>
-        <button class="digit-chip" type="button" data-digit="7">7</button>
-        <button class="digit-chip" type="button" data-digit="8">8</button>
-        <button class="digit-chip" type="button" data-digit="9">9</button>
-      </div>
     </div>
     <button class="menu-btn manual-swap-btn" id="manualSwapBtn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10l-3-3"/><path d="M7 7l3 3"/><path d="M17 17H7l3 3"/><path d="M17 17l-3-3"/></svg> Girar factores</button>
     <button class="menu-btn manual-close-btn" id="manualCloseBtn">Cerrar</button>
@@ -1709,6 +1677,10 @@ function manualAddCarryRow(row, cols, sectionId){
     manualGrid.querySelectorAll('.carry-section-' + sectionId).forEach(el => {
       el.classList.toggle('carry-hidden', !cb.checked);
     });
+    // Mostrar/ocultar la fila de llevadas cambia el alto de la cuadrícula,
+    // así que la línea que conecta los cuadros de colores debe recalcularse
+    // con las nuevas posiciones.
+    manualRenderSeqOverlay();
   });
   label.appendChild(cb);
   label.appendChild(mark);
@@ -1725,6 +1697,13 @@ function manualAddCarryRow(row, cols, sectionId){
       inp.maxLength = 1;
       inp.className = 'manual-carry-input';
       inp.setAttribute('aria-label', 'Llevada');
+      // Al presionar la casilla, el valor va cambiando 0,1,2...9 y vuelve a
+      // empezar en 0, sin fin, igual que en las casillas de resultado.
+      inp.addEventListener('click', () => {
+        const cur = inp.value === '' ? -1 : parseInt(inp.value, 10);
+        inp.value = String((cur + 1) % 10);
+        playClick();
+      });
       cell.appendChild(inp);
     }
   }
@@ -1732,20 +1711,22 @@ function manualAddCarryRow(row, cols, sectionId){
 
 function manualAddStaticNumberRow(row, value, toggleable, hasSecondRound){
   const digits = String(value).padStart(3, ' ').split('');
+  const cells = [];
   for(let col = 2; col <= 4; col++){
     const cell = manualMakeCell(col, row);
     const d = digits[col - 2];
     cell.textContent = (d === ' ' || d === undefined) ? '' : d;
     if(toggleable && cell.textContent !== ''){
       cell.classList.add('manual-digit-toggle');
-      if(hasSecondRound) manualTopToggleCells.push(cell);
+      manualTopToggleCells.push(cell);
       cell.addEventListener('click', () => {
         playClick();
-        const doneClass = manualDigitRound === 0 ? 'manual-digit-done' : 'manual-digit-done2';
-        cell.classList.toggle(doneClass);
+        manualSeqOnTopClick(cell);
       });
     }
+    cells.push(cell);
   }
+  return cells;
 }
 
 
@@ -1756,7 +1737,14 @@ function manualAddSymbolRow(row, symbol, value, hasSecondRound){
   if(hasSecondRound){
     manualAddBottomNumberRow(row, value);
   } else {
-    manualAddStaticNumberRow(row, value);
+    const cells = manualAddStaticNumberRow(row, value);
+    const bottomCell = cells[cells.length - 1];
+    manualBottomToggleCells[0] = bottomCell;
+    bottomCell.classList.add('manual-seq-clickable');
+    bottomCell.addEventListener('click', () => {
+      playClick();
+      manualSeqOnBottomClick(0);
+    });
   }
 }
 
@@ -1774,7 +1762,17 @@ function manualAddBottomNumberRow(row, value){
       manualBottomToggleCells[roundForCell] = cell;
       cell.addEventListener('click', () => {
         playClick();
-        manualSelectRound(roundForCell);
+        if(manualSeqRound === roundForCell){
+          // Esta ronda ya está activa: el toque repetido avanza el
+          // selector de arriba uno por uno y, al llegar al final,
+          // vuelve a empezar desde el primer dígito, sin fin.
+          manualSeqPtr++;
+          if(manualSeqPtr >= manualSeqTopCells.length) manualSeqPtr = 0;
+          manualSeqDone = false;
+          manualRenderSeqOverlay();
+        } else {
+          manualSelectRound(roundForCell);
+        }
       });
     }
   }
@@ -1787,6 +1785,10 @@ function manualSelectRound(newRound){
   if(manualBottomToggleCells[0]) manualBottomToggleCells[0].classList.toggle('manual-digit-done', newRound === 0);
   if(manualBottomToggleCells[1]) manualBottomToggleCells[1].classList.toggle('manual-digit-done2', newRound === 1);
   manualTopToggleCells.forEach(c => c.classList.remove('manual-digit-done', 'manual-digit-done2'));
+  manualSeqRound = newRound;
+  manualSeqPtr = 0;
+  manualSeqDone = false;
+  manualRenderSeqOverlay();
 }
 
 function manualAddSymbolOnly(row, symbol){
@@ -1820,10 +1822,16 @@ function manualAddAnswerRow(row, startCol, width, extraClass){
   inputs.forEach((inp, idx) => {
     inp.addEventListener('input', () => {
       inp.value = inp.value.replace(/[^0-9]/g, '').slice(0, 1);
-      if(inp.value && idx < inputs.length - 1) inputs[idx + 1].focus();
     });
     inp.addEventListener('keydown', (e) => {
       if(e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx - 1].focus();
+    });
+    // Al presionar la casilla, el valor va cambiando 0,1,2...9 y vuelve a
+    // empezar en 0, sin fin.
+    inp.addEventListener('click', () => {
+      const cur = inp.value === '' ? -1 : parseInt(inp.value, 10);
+      inp.value = String((cur + 1) % 10);
+      playClick();
     });
   });
   manualAllAnswerInputs = manualAllAnswerInputs.concat(inputs);
@@ -1836,14 +1844,22 @@ function buildManualGrid(a, b){
   manualTopToggleCells = [];
   manualBottomToggleCells = {};
   manualDigitRound = 0;
+  manualSeqTopCells = [];
+  manualSeqRound = 0;
+  manualSeqPtr = 0;
+  manualSeqDone = false;
+  manualSeqOverlaySvg = null;
   const bIsTwoDigits = String(b).length > 1;
+  manualBIsTwoDigits = bIsTwoDigits;
   let row = 1;
 
   // Fila de llevadas para el primer producto, arriba de las centenas y decenas del número de arriba
   manualAddCarryRow(row, [2, 3], 'top'); row++;
   // Número de arriba (multiplicando): dígitos pulsables para marcar cuáles ya se multiplicaron
   // hasSecondRound=true cuando el multiplicador tiene dos cifras, para alternar color rosa -> celeste entre rondas
-  manualAddStaticNumberRow(row, a, true, bIsTwoDigits); row++;
+  const manualTopCellsRow = manualAddStaticNumberRow(row, a, true, bIsTwoDigits); row++;
+  // Secuencia automática guiada: orden de derecha a izquierda (unidades primero)
+  manualSeqTopCells = manualTopCellsRow.filter(c => c.textContent !== '').reverse();
   // Símbolo de multiplicar y el multiplicador
   manualAddSymbolRow(row, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>', b, bIsTwoDigits); row++;
   // Línea divisoria
@@ -1863,7 +1879,9 @@ function buildManualGrid(a, b){
     manualAddAnswerRow(row, 2, 3); // resultado final
   }
 
+  manualInitSeqOverlay();
   if(bIsTwoDigits) manualSelectRound(0);
+  manualRenderSeqOverlay();
 
   setTimeout(() => {
     if(manualAllAnswerInputs.length) manualAllAnswerInputs[manualAllAnswerInputs.length - 1].focus();
@@ -1875,6 +1893,134 @@ let manualTopToggleCells = [];
 let manualBottomToggleCells = {};
 let manualDigitRound = 0;
 let manualCarriesState = { top:false, mid:false, sum:false };
+let manualSeqTopCells = [];
+let manualSeqRound = 0;
+let manualSeqPtr = 0;
+let manualSeqDone = false;
+let manualSeqOverlaySvg = null;
+let manualBIsTwoDigits = false;
+
+// Secuencia automática guiada: círculo sobre el número de arriba y el número de abajo que se están
+// multiplicando, unidos por una línea. Al tocar el número de abajo activo, la secuencia avanza al
+// siguiente dígito de arriba; al agotar los dígitos de la primera ronda en multiplicaciones de dos
+// cifras, cambia a la segunda ronda (círculo azul) automáticamente.
+function manualSeqOnBottomClick(round){
+  if(manualSeqDone) return;
+  if(round !== manualSeqRound) return;
+  manualSeqAdvance();
+}
+
+// Tocar directamente un dígito de arriba: lo empareja con el dígito de abajo de la ronda activa.
+// Si se toca el mismo dígito de arriba que ya estaba emparejado, alterna entre la ronda roja
+// (unidades del multiplicador) y la azul (decenas), repitiendo ese ciclo en cada toque siguiente.
+// Si el multiplicador es de una sola cifra (no hay ronda azul), volver a tocar el mismo dígito
+// no hace nada: la selección se queda quieta, igual que ocurre con las de dos cifras.
+function manualSeqOnTopClick(cell){
+  const idx = manualSeqTopCells.indexOf(cell);
+  if(idx === -1) return;
+  const samePointer = !manualSeqDone && manualSeqPtr === idx;
+  if(samePointer){
+    if(manualBIsTwoDigits){
+      const newRound = manualSeqRound === 0 ? 1 : 0;
+      manualDigitRound = newRound;
+      manualSeqRound = newRound;
+      if(manualBottomToggleCells[0]) manualBottomToggleCells[0].classList.toggle('manual-digit-done', newRound === 0);
+      if(manualBottomToggleCells[1]) manualBottomToggleCells[1].classList.toggle('manual-digit-done2', newRound === 1);
+    }
+  } else {
+    manualSeqPtr = idx;
+  }
+  manualSeqDone = false;
+  manualRenderSeqOverlay();
+}
+
+function manualSeqAdvance(){
+  manualSeqPtr++;
+  if(manualSeqPtr >= manualSeqTopCells.length){
+    if(manualBIsTwoDigits){
+      if(manualSeqRound === 0){
+        manualSeqRound = 1;
+        manualSeqPtr = 0;
+        manualSelectRound(1);
+        return;
+      } else {
+        // Terminó la ronda azul (decenas): vuelve a la ronda roja (unidades)
+        // y el recorrido sigue así indefinidamente, igual que con 1 cifra.
+        manualSeqRound = 0;
+        manualSeqPtr = 0;
+        manualSelectRound(0);
+        return;
+      }
+    } else {
+      // Multiplicador de una sola cifra: el recorrido no termina, vuelve a
+      // empezar desde el primer dígito y sigue así indefinidamente.
+      manualSeqPtr = 0;
+    }
+  }
+  manualRenderSeqOverlay();
+}
+
+function manualInitSeqOverlay(){
+  const ns = 'http://www.w3.org/2000/svg';
+  manualSeqOverlaySvg = document.createElementNS(ns, 'svg');
+  manualSeqOverlaySvg.setAttribute('class', 'manual-seq-overlay');
+  manualGrid.appendChild(manualSeqOverlaySvg);
+}
+
+function manualRenderSeqOverlay(){
+  if(!manualSeqOverlaySvg) return;
+  manualSeqOverlaySvg.innerHTML = '';
+  const gridRect = manualGrid.getBoundingClientRect();
+  // Fijar el tamaño real del SVG (atributos, no solo CSS) para que sus coordenadas
+  // internas coincidan en pixeles con las de las celdas; si no, el navegador usa el
+  // tamaño intrínseco por defecto (300x150) y escala todo el dibujo, agrandándolo.
+  manualSeqOverlaySvg.setAttribute('width', gridRect.width);
+  manualSeqOverlaySvg.setAttribute('height', gridRect.height);
+  manualSeqOverlaySvg.setAttribute('viewBox', '0 0 ' + gridRect.width + ' ' + gridRect.height);
+
+  // Quitar el resaltado de cuadro anterior: solo el par actual debe quedar marcado
+  manualSeqTopCells.forEach(c => c.classList.remove('manual-digit-done', 'manual-digit-done2'));
+  if(manualBottomToggleCells[0]) manualBottomToggleCells[0].classList.remove('manual-digit-done');
+  if(manualBottomToggleCells[1]) manualBottomToggleCells[1].classList.remove('manual-digit-done2');
+
+  if(manualSeqDone) return;
+  const topCell = manualSeqTopCells[manualSeqPtr];
+  const bottomCell = manualBottomToggleCells[manualSeqRound];
+  if(!topCell || !bottomCell) return;
+
+  const roundClass = manualSeqRound === 0 ? 'round0' : 'round1';
+  const doneClass = manualSeqRound === 0 ? 'manual-digit-done' : 'manual-digit-done2';
+  topCell.classList.add(doneClass);
+  bottomCell.classList.add(doneClass);
+
+  // Línea que une los dos cuadros activos, del mismo color que ellos.
+  // Se recorta al borde de cada cuadro (no al centro) para que solo ocupe el
+  // espacio entre ambos y nunca pase por encima de los números.
+  const ns = 'http://www.w3.org/2000/svg';
+  const tr = topCell.getBoundingClientRect();
+  const br = bottomCell.getBoundingClientRect();
+  const tcx = tr.left + tr.width / 2 - gridRect.left;
+  const tcy = tr.top + tr.height / 2 - gridRect.top;
+  const bcx = br.left + br.width / 2 - gridRect.left;
+  const bcy = br.top + br.height / 2 - gridRect.top;
+  const dx = bcx - tcx, dy = bcy - tcy;
+  const dist = Math.hypot(dx, dy) || 1;
+  const ux = dx / dist, uy = dy / dist;
+  const edgePoint = (cx, cy, halfW, halfH, dirX, dirY) => {
+    if(dirX === 0 && dirY === 0) return { x: cx, y: cy };
+    const tX = dirX !== 0 ? Math.abs(halfW / dirX) : Infinity;
+    const tY = dirY !== 0 ? Math.abs(halfH / dirY) : Infinity;
+    const t = Math.min(tX, tY);
+    return { x: cx + dirX * t, y: cy + dirY * t };
+  };
+  const startPt = edgePoint(tcx, tcy, tr.width / 2, tr.height / 2, ux, uy);
+  const endPt = edgePoint(bcx, bcy, br.width / 2, br.height / 2, -ux, -uy);
+  const line = document.createElementNS(ns, 'line');
+  line.setAttribute('x1', startPt.x); line.setAttribute('y1', startPt.y);
+  line.setAttribute('x2', endPt.x); line.setAttribute('y2', endPt.y);
+  line.setAttribute('class', 'manual-seq-line ' + roundClass);
+  manualSeqOverlaySvg.appendChild(line);
+}
 
 function openManualMultModal(){
   if(activeIndex >= factorsOrder.length) return;
@@ -1905,67 +2051,6 @@ manualCloseBtn.addEventListener('click', () => {
 });
 manualMultOverlay.addEventListener('click', (e) => {
   if(e.target === manualMultOverlay) closeManualMultModal();
-});
-
-// ---- Bandeja de números 0-9 arrastrables (no se agotan) para llenar las casillas sin teclado ----
-let dragGhost = null;
-let dragDigit = null;
-let dragHoverTarget = null;
-
-function isManualDropTarget(el){
-  if(!el) return false;
-  if(el.classList.contains('manual-answer-input')) return true;
-  if(el.classList.contains('manual-carry-input')) return true;
-  return false;
-}
-
-function moveDragGhost(x, y){
-  if(dragGhost){
-    dragGhost.style.left = x + 'px';
-    dragGhost.style.top = y + 'px';
-  }
-}
-
-function updateDragHover(x, y){
-  const el = document.elementFromPoint(x, y);
-  const target = isManualDropTarget(el) ? el : null;
-  if(dragHoverTarget && dragHoverTarget !== target) dragHoverTarget.classList.remove('drop-hover');
-  if(target) target.classList.add('drop-hover');
-  dragHoverTarget = target;
-}
-
-function onDigitPointerMove(e){
-  moveDragGhost(e.clientX, e.clientY);
-  updateDragHover(e.clientX, e.clientY);
-}
-
-function onDigitPointerUp(e){
-  document.removeEventListener('pointermove', onDigitPointerMove);
-  if(dragGhost){ dragGhost.remove(); dragGhost = null; }
-  if(dragHoverTarget){
-    dragHoverTarget.classList.remove('drop-hover');
-    dragHoverTarget.value = dragDigit;
-    dragHoverTarget.dispatchEvent(new Event('input', { bubbles:true }));
-    dragHoverTarget.focus();
-    playClick();
-  }
-  dragHoverTarget = null;
-  dragDigit = null;
-}
-
-function onDigitPointerDown(e){
-  e.preventDefault();
-  dragDigit = e.currentTarget.dataset.digit;
-  dragGhost = e.currentTarget.cloneNode(true);
-  dragGhost.classList.add('digit-ghost');
-  document.body.appendChild(dragGhost);
-  moveDragGhost(e.clientX, e.clientY);
-  document.addEventListener('pointermove', onDigitPointerMove);
-  document.addEventListener('pointerup', onDigitPointerUp, { once:true });
-}
-
-document.querySelectorAll('.digit-chip').forEach(chip=>{
-  chip.addEventListener('pointerdown', onDigitPointerDown);
 });
 
 
