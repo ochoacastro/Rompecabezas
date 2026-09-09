@@ -18,6 +18,12 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
+  .icon{ width:1em; height:1em; vertical-align:-0.15em; display:inline-block; flex-shrink:0; }
+  .icon-photo{
+    width:1.4em; height:1.4em; border-radius:50%;
+    object-fit:cover; vertical-align:-0.4em; display:inline-block;
+    border:2px solid #ffffffaa;
+  }
   body{
     font-family:'Nunito',sans-serif;
     background:
@@ -492,7 +498,12 @@
     display:inline-block;
     padding:10px 20px;
     font-size:15px;
+    background:#eef7f1;
+    color:var(--forest);
+    border:2px solid var(--leaf-light);
+    box-shadow:0 3px 0 var(--leaf-light);
   }
+  .manual-swap-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--leaf-light); }
 
   .celebrate-overlay{
     position:fixed; inset:0;
@@ -545,48 +556,48 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>🐒 Rompecabezas de las Tablas 🐒</h1>
+  <h1><img class="icon-photo" src="https://images.unsplash.com/photo-1677741447040-f998d387a1a0?w=100&q=60&auto=format&fit=crop" alt="Mono"> Rompecabezas de las Tablas <img class="icon-photo" src="https://images.unsplash.com/photo-1677741447040-f998d387a1a0?w=100&q=60&auto=format&fit=crop" alt="Mono"></h1>
   <p class="subtitle">Cada tabla tiene su propio animalito escondido</p>
 
   <div id="menuScreen" class="screen">
-    <button id="menuPlayBtn" class="menu-btn">▶️ Jugar (tablas del 1 al 12)</button>
-    <button id="menuSelectBtn" class="menu-btn">🎯 Elegir una tabla</button>
-    <button id="menuStampsBtn" class="menu-btn">🎫 Ver mis estampillas</button>
+    <button id="menuPlayBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg> Jugar (tablas del 1 al 12)</button>
+    <button id="menuSelectBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg> Elegir una tabla</button>
+    <button id="menuStampsBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v1.5a1.5 1.5 0 000 3V14a2 2 0 01-2 2H5a2 2 0 01-2-2v-1.5a1.5 1.5 0 000-3V8z"/><line x1="9" y1="6" x2="9" y2="16" stroke-dasharray="2,2"/></svg> Ver mis estampillas</button>
   </div>
 
   <div id="selectTableScreen" class="screen" style="display:none;">
     <p class="menu-title">Elige la tabla que quieres practicar</p>
-    <p class="stars-legend"><span class="seq">★ Jugar</span> &nbsp;·&nbsp; <span class="manual">★ Manual</span></p>
+    <p class="stars-legend"><span class="seq"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 17.27l-5.81 3.1 1.11-6.47-4.7-4.58 6.5-.94L12 2.5z"/></svg> Jugar</span> &nbsp;·&nbsp; <span class="manual"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 17.27l-5.81 3.1 1.11-6.47-4.7-4.58 6.5-.94L12 2.5z"/></svg> Manual</span></p>
     <div class="select-grid" id="selectChips"></div>
     <button id="selectPlayBtn" class="menu-btn">Jugar esta tabla</button>
-    <button id="selectBackBtn" class="menu-btn secondary">⬅️ Regresar al menú</button>
+    <button id="selectBackBtn" class="menu-btn secondary"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Regresar al menú</button>
   </div>
 
   <div id="stampsScreen" class="screen" style="display:none;">
-    <p class="menu-title">🎫 Mi colección de estampillas</p>
+    <p class="menu-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v1.5a1.5 1.5 0 000 3V14a2 2 0 01-2 2H5a2 2 0 01-2-2v-1.5a1.5 1.5 0 000-3V8z"/><line x1="9" y1="6" x2="9" y2="16" stroke-dasharray="2,2"/></svg> Mi colección de estampillas</p>
 
-    <p class="stamp-section-title seq">⭐ Modo Jugar (tablas del 1 al 12)</p>
+    <p class="stamp-section-title seq"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 17.27l-5.81 3.1 1.11-6.47-4.7-4.58 6.5-.94L12 2.5z"/></svg> Modo Jugar (tablas del 1 al 12)</p>
     <div class="stamp-collection" id="stampCollectionViewSeq">
       <p class="stamp-empty">Todavía no tienes estampillas en este modo. ¡Completa una tabla sin errores para ganar la primera!</p>
     </div>
 
-    <p class="stamp-section-title manual">★ Modo Elegir tabla</p>
+    <p class="stamp-section-title manual"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 17.27l-5.81 3.1 1.11-6.47-4.7-4.58 6.5-.94L12 2.5z"/></svg> Modo Elegir tabla</p>
     <div class="stamp-collection" id="stampCollectionViewSingle">
       <p class="stamp-empty">Todavía no tienes estampillas en este modo. ¡Completa una tabla sin errores para ganar la primera!</p>
     </div>
 
-    <button id="stampsBackBtn" class="menu-btn secondary" style="margin-top:14px;">⬅️ Regresar al menú</button>
+    <button id="stampsBackBtn" class="menu-btn secondary" style="margin-top:14px;"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Regresar al menú</button>
   </div>
 
   <div id="gameScreen" class="screen" style="display:none;">
     <div style="text-align:center;margin-bottom:10px;">
-      <button id="soundToggle" class="chip" style="font-size:14px;">🔊 Sonido activado</button>
-      <button id="gameMenuBtn" class="chip" style="font-size:14px;">⬅️ Menú</button>
+      <button id="soundToggle" class="chip" style="font-size:14px;"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8a5 5 0 010 8" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M19 5.5a9 9 0 010 13" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg> Sonido activado</button>
+      <button id="gameMenuBtn" class="chip" style="font-size:14px;"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Menú</button>
     </div>
 
     <div class="statbar">
-      <span>⭐ Aciertos: <span class="big" id="scoreCount">0</span>/12</span>
-      <span>🍌 Tabla del <span class="big" id="currentTable">3</span></span>
+      <span><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 17.27l-5.81 3.1 1.11-6.47-4.7-4.58 6.5-.94L12 2.5z"/></svg> Aciertos: <span class="big" id="scoreCount">0</span>/12</span>
+      <span><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M5 15c-1.5 2-1.5 4.5 1 5.5 4 1.6 11-.5 13.5-7 1-2.7.5-5-1-6-1 2-3 3.5-5.5 4-3.5.7-6.5 0-8 3.5z"/><path d="M6 15c-.7-3 .5-8 5-10.5" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg> Tabla del <span class="big" id="currentTable">3</span></span>
     </div>
 
     <div class="board-frame">
@@ -599,8 +610,8 @@
     <div class="equation-row" id="equationRow">
       <div class="equation-bar" id="equationBar">&nbsp;</div>
       <div class="equation-buttons">
-        <button class="manual-btn" id="manualBtn" title="Multiplicar manualmente" style="display:none;">✏️</button>
-        <button class="reroll-btn" id="rerollBtn" title="Cambiar pregunta">🔃</button>
+        <button class="manual-btn" id="manualBtn" title="Multiplicar manualmente" style="display:none;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 21l1.5-5.5L15.5 4.5a1.5 1.5 0 012.12 0l1.88 1.88a1.5 1.5 0 010 2.12L8.5 19.5 3 21z"/><line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/></svg></button>
+        <button class="reroll-btn" id="rerollBtn" title="Cambiar pregunta"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L7 6l5 5V7a5 5 0 11-4.9 6h-2.07A7 7 0 1012 4z"/></svg></button>
       </div>
     </div>
 
@@ -609,14 +620,14 @@
 </div>
 
 <div class="celebrate-overlay" id="overlay">
-  <h2>¡Lo lograste! 🎉</h2>
+  <h2><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 21l6-2 9-9-4-4-9 9-2 6z"/><circle cx="18" cy="4" r="1" fill="currentColor" stroke="none"/><circle cx="21" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="2" r="1" fill="currentColor" stroke="none"/></svg> ¡Lo lograste!</h2>
   <div class="overlay-stars" id="overlayStars"></div>
   <p id="overlayText">Completaste la tabla y descubriste al animalito.</p>
   <p class="overlay-note" id="overlayNote"></p>
   <div class="overlay-actions">
-    <button class="again-btn" id="nextTableBtn">Siguiente tabla ➡️</button>
-    <button class="again-btn secondary" id="retryBtn">🔁 Reintentar</button>
-    <button class="again-btn secondary" id="overlayMenuBtn">⬅️ Regresar al menú</button>
+    <button class="again-btn" id="nextTableBtn">Siguiente tabla <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 13h12.17l-4.88 4.88a1 1 0 101.41 1.41l6.59-6.58a1 1 0 000-1.42l-6.59-6.58a1 1 0 10-1.41 1.41L16.17 11H4a1 1 0 000 2z"/></svg></button>
+    <button class="again-btn secondary" id="retryBtn"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L7 6l5 5V7a5 5 0 11-4.9 6h-2.07A7 7 0 1012 4z"/></svg> Reintentar</button>
+    <button class="again-btn secondary" id="overlayMenuBtn"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Regresar al menú</button>
   </div>
 </div>
 
@@ -628,9 +639,9 @@
 
 <div class="manual-mult-overlay" id="manualMultOverlay">
   <div class="manual-mult-card">
-    <div class="manual-mult-title">✏️ Multiplicación manual</div>
+    <div class="manual-mult-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 21l1.5-5.5L15.5 4.5a1.5 1.5 0 012.12 0l1.88 1.88a1.5 1.5 0 010 2.12L8.5 19.5 3 21z"/><line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/></svg> Multiplicación manual</div>
     <div class="manual-grid" id="manualGrid"></div>
-    <button class="menu-btn secondary manual-swap-btn" id="manualSwapBtn">🔄 Girar factores</button>
+    <button class="menu-btn manual-swap-btn" id="manualSwapBtn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10l-3-3"/><path d="M7 7l3 3"/><path d="M17 17H7l3 3"/><path d="M17 17l-3-3"/></svg> Girar factores</button>
     <button class="menu-btn manual-close-btn" id="manualCloseBtn">Cerrar</button>
   </div>
 </div>
@@ -771,7 +782,9 @@ function playVictory(){
 }
 document.getElementById('soundToggle').addEventListener('click', function(){
   soundOn = !soundOn;
-  this.textContent = soundOn ? '🔊 Sonido activado' : '🔇 Sonido apagado';
+  this.innerHTML = soundOn
+    ? '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8a5 5 0 010 8" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M19 5.5a9 9 0 010 13" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg> Sonido activado'
+    : '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9H4z"/><line x1="16" y1="9" x2="21" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="21" y1="9" x2="16" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg> Sonido apagado';
   if(!soundOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
   if(soundOn) playClick();
 });
@@ -840,7 +853,8 @@ function setScene(){
 }
 sceneEl.addEventListener('load', applyGridLayout);
 
-// ---- Estrellas: 0 errores=3⭐, 1 error=2⭐, 2-3 errores=1⭐, más de 3=0⭐ ----
+// ---- Estrellas: 0 errores=3, 1 error=2, 2-3 errores=1, más de 3=0 ----
+const STAR_ICON = '<svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 17.27l-5.81 3.1 1.11-6.47-4.7-4.58 6.5-.94L12 2.5z"/></svg>';
 function computeStars(errors){
   if(errors === 0) return 3;
   if(errors === 1) return 2;
@@ -863,8 +877,8 @@ function buildSelectTableScreen(){
     card.className = 'table-card' + (t===selectedTable ? ' active':'');
     card.innerHTML = `
       <div class="chip">${t}</div>
-      <div class="stars-line seq">${starsHtml(starsSequential[t]||0, '★', 'seq')}</div>
-      <div class="stars-line manual">${starsHtml(starsManual[t]||0, '★', 'manual')}</div>
+      <div class="stars-line seq">${starsHtml(starsSequential[t]||0, STAR_ICON, 'seq')}</div>
+      <div class="stars-line manual">${starsHtml(starsManual[t]||0, STAR_ICON, 'manual')}</div>
     `;
     card.addEventListener('click', ()=>{
       playClick();
@@ -1012,7 +1026,7 @@ function onTileClick(tile){
     solvedCount++;
     scoreCountEl.textContent = solvedCount;
     renderEquationBar(f, target);
-    messageEl.textContent = `¡Correcto! 🎈`;
+    messageEl.innerHTML = '¡Correcto! <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><ellipse cx="12" cy="9" rx="6" ry="7"/><path d="M12 16l-1.2 3.2h2.4L12 16z"/><line x1="12" y1="19.2" x2="12" y2="23" stroke="currentColor" stroke-width="1.4"/></svg>';
     playCorrect();
     speakCorrect(currentTable, f, target);
     burstConfettiAt(tile);
@@ -1025,7 +1039,7 @@ function onTileClick(tile){
   } else {
     tile.classList.add('wrong');
     errorCount++;
-    messageEl.textContent = `Incorrecto. 🐢`;
+    messageEl.innerHTML = 'Incorrecto. <img class="icon-photo" src="https://images.unsplash.com/photo-1496196614460-48988a57fccf?w=100&q=60&auto=format&fit=crop" alt="Tortuga">';
     playWrong();
     speakWrong(target);
     setTimeout(()=>tile.classList.remove('wrong'),400);
@@ -1149,11 +1163,12 @@ function retryTable(){
 function showChoiceOverlay(stars){
   overlayText.textContent = `Completaste la tabla del ${currentTable} y descubriste al ${nombresAnimales[sceneKey] || 'animalito'}.`;
   const starClass = gameMode === 'sequential' ? 'seq' : 'manual';
-  overlayStarsEl.innerHTML = starsHtml(stars, gameMode === 'sequential' ? '⭐' : '★', starClass);
+  overlayStarsEl.innerHTML = starsHtml(stars, STAR_ICON, starClass);
+  const ticketIcon = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v1.5a1.5 1.5 0 000 3V14a2 2 0 01-2 2H5a2 2 0 01-2-2v-1.5a1.5 1.5 0 000-3V8z"/><line x1="9" y1="6" x2="9" y2="16" stroke-dasharray="2,2"/></svg>';
   if(stars === 3){
-    overlayNoteEl.textContent = pendingStampIsNew
-      ? '¡Sin errores! Ganaste una estampilla nueva 🎫'
-      : '¡Sin errores! Ya tenías esta estampilla en tu colección 🎫';
+    overlayNoteEl.innerHTML = pendingStampIsNew
+      ? `¡Sin errores! Ganaste una estampilla nueva ${ticketIcon}`
+      : `¡Sin errores! Ya tenías esta estampilla en tu colección ${ticketIcon}`;
   } else if(errorCount === 0){
     overlayNoteEl.textContent = '';
   } else {
@@ -1183,7 +1198,7 @@ nextTableBtn.addEventListener('click', ()=>{ playClick(); nextTable(); });
 retryBtn.addEventListener('click', ()=>{ playClick(); retryTable(); });
 overlayMenuBtn.addEventListener('click', ()=>{ playClick(); goToMenu(); });
 
-// ---- Ventana de multiplicación manual (lápiz ✏️): solo para tablas 10, 11 y 12 ----
+// ---- Ventana de multiplicación manual (lápiz): solo para tablas 10, 11 y 12 ----
 function manualMakeCell(col, row, extraClass){
   const cell = document.createElement('div');
   cell.className = 'manual-cell' + (extraClass ? ' ' + extraClass : '');
@@ -1218,13 +1233,13 @@ function manualAddStaticNumberRow(row, value){
 
 function manualAddSymbolRow(row, symbol, value){
   const symCell = manualMakeCell(1, row, 'manual-op-cell');
-  symCell.textContent = symbol;
+  symCell.innerHTML = symbol;
   manualAddStaticNumberRow(row, value);
 }
 
 function manualAddSymbolOnly(row, symbol){
   const symCell = manualMakeCell(1, row, 'manual-op-cell');
-  symCell.textContent = symbol;
+  symCell.innerHTML = symbol;
 }
 
 function manualAddLineRow(row){
@@ -1272,8 +1287,8 @@ function buildManualGrid(a, b){
   manualAddCarryRow(row, [2, 3]); row++;
   // Número de arriba (multiplicando)
   manualAddStaticNumberRow(row, a); row++;
-  // Símbolo ✖️ y el multiplicador
-  manualAddSymbolRow(row, '✖️', b); row++;
+  // Símbolo de multiplicar y el multiplicador
+  manualAddSymbolRow(row, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>', b); row++;
   // Línea divisoria
   manualAddLineRow(row); row++;
 
@@ -1284,7 +1299,7 @@ function buildManualGrid(a, b){
     // Multiplicador de dos cifras: dos productos parciales + suma
     manualAddAnswerRow(row, 2, 3); row++; // producto parcial 1 (a × unidades de b)
     manualAddCarryRow(row, [2, 3]); row++; // llevadas del segundo producto parcial
-    manualAddSymbolOnly(row, '➕'); // símbolo + para indicar la suma, en la misma fila del producto 2
+    manualAddSymbolOnly(row, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'); // símbolo + para indicar la suma, en la misma fila del producto 2
     manualAddAnswerRow(row, 2, 2); row++; // producto parcial 2 (a × decenas de b), corrido una casilla a la izquierda
     manualAddLineRow(row); row++; // línea de la suma
     manualAddCarryRow(row, [2, 3]); row++; // llevadas de la suma final
