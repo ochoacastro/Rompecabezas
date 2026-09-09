@@ -754,17 +754,25 @@ const sceneImages = {
   cebra: 'https://images.unsplash.com/photo-1716750668795-7fb39ad3b298?w=800&q=80&auto=format&fit=crop'
 };
 const sceneKeys = Object.keys(sceneImages);
-const animalPorTabla = {
+// Mapeo de animal por tabla en modo "Jugar" (secuencial, tablas del 1 al 12)
+const animalPorTablaSequential = {
   1:'gato', 2:'perro', 3:'tucan', 4:'leon', 5:'elefante',
   6:'jirafa', 7:'mono', 8:'panda', 9:'tortuga', 10:'delfin',
   11:'koala', 12:'cebra'
+};
+// Mapeo de animal por tabla en modo "Elegir tabla" (individual) — corrido para que
+// la misma tabla nunca muestre el mismo animal que en el modo secuencial
+const animalPorTablaSingle = {
+  1:'elefante', 2:'jirafa', 3:'mono', 4:'panda', 5:'tortuga',
+  6:'delfin', 7:'koala', 8:'cebra', 9:'gato', 10:'perro',
+  11:'tucan', 12:'leon'
 };
 const nombresAnimales = {
   gato:'gatito', perro:'perrito', tucan:'tucán', leon:'leoncito',
   elefante:'elefante', jirafa:'jirafa', mono:'mono', panda:'panda',
   tortuga:'tortuga', delfin:'delfín', koala:'koala', cebra:'cebra'
 };
-let sceneKey = animalPorTabla[3];
+let sceneKey = animalPorTablaSequential[3];
 
 function pickGridLayout(aspect){
   // Opciones de columnas x filas que dan 12 piezas en total.
@@ -787,7 +795,8 @@ function applyGridLayout(){
 }
 
 function setScene(){
-  sceneKey = animalPorTabla[currentTable] || sceneKeys[0];
+  const animalMap = gameMode === 'sequential' ? animalPorTablaSequential : animalPorTablaSingle;
+  sceneKey = animalMap[currentTable] || sceneKeys[0];
   sceneEl.src = sceneImages[sceneKey];
   if(sceneEl.complete) applyGridLayout();
 }
