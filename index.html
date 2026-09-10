@@ -670,13 +670,94 @@
   }
   .digit-picker-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--leaf-light); }
   .digit-picker-btn.zero{ grid-column:2; }
-  .digit-picker-close{
+  .digit-picker-btn.selected{
+    background:var(--sun);
+    border-color:var(--sun-deep);
+    box-shadow:0 3px 0 var(--sun-deep);
+  }
+  .digit-picker-buttons{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:8px;
+    width:100%;
     margin-top:2px;
+  }
+  .digit-picker-action{
     width:auto;
     display:inline-block;
     padding:10px 26px;
     font-size:15px;
   }
+  .digit-picker-action.mode-insert{
+    background:linear-gradient(160deg, var(--leaf-light) 0%, #14b8a6 100%);
+    color:var(--forest);
+    box-shadow:0 4px 0 #0f766e, 0 10px 18px rgba(20,11,50,0.35), inset 0 2px 0 rgba(255,255,255,0.4);
+  }
+  .digit-picker-action.mode-insert:active{ transform:translateY(3px); box-shadow:0 1px 0 #0f766e, inset 0 2px 0 rgba(255,255,255,0.4); }
+  .digit-picker-action.mode-modify{
+    background:linear-gradient(160deg, var(--coral) 0%, #c2185b 100%);
+    color:#fff;
+    box-shadow:0 4px 0 #93123f, 0 10px 18px rgba(20,11,50,0.35), inset 0 2px 0 rgba(255,255,255,0.4);
+  }
+  .digit-picker-action.mode-modify:active{ transform:translateY(3px); box-shadow:0 1px 0 #93123f, inset 0 2px 0 rgba(255,255,255,0.4); }
+  .digit-picker-cancel{
+    width:auto;
+    display:none;
+    padding:9px 26px;
+    font-size:14px;
+    background:transparent;
+    border:2px solid var(--forest);
+    color:var(--forest);
+    box-shadow:none;
+    margin-bottom:0;
+  }
+  .digit-picker-cancel.show-cancel{ display:inline-block; }
+  .digit-picker-cancel:active{ transform:translateY(2px); }
+
+  .digit-confirm-overlay{
+    position:fixed; inset:0;
+    background:rgba(20,12,48,0.82);
+    display:flex; align-items:center; justify-content:center;
+    z-index:300;
+    opacity:0; pointer-events:none;
+    transition:opacity .18s;
+    padding:24px;
+  }
+  .digit-confirm-overlay.show{ opacity:1; pointer-events:auto; }
+  .digit-confirm-card{
+    background:var(--cream);
+    border-radius:22px;
+    padding:24px;
+    box-shadow:0 10px 0 rgba(0,0,0,0.25);
+    display:flex; flex-direction:column; align-items:stretch;
+    gap:16px;
+    max-width:300px;
+  }
+  .digit-confirm-text{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    color:var(--forest);
+    font-size:18px;
+    text-align:center;
+  }
+  .digit-confirm-buttons{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .digit-confirm-yes{
+    background:linear-gradient(160deg, var(--coral) 0%, #c2185b 100%);
+    color:#fff;
+    box-shadow:0 4px 0 #93123f, 0 10px 18px rgba(20,11,50,0.35), inset 0 2px 0 rgba(255,255,255,0.4);
+  }
+  .digit-confirm-yes:active{ transform:translateY(3px); box-shadow:0 1px 0 #93123f, inset 0 2px 0 rgba(255,255,255,0.4); }
+  .digit-confirm-no{
+    background:linear-gradient(160deg, var(--leaf-light) 0%, #14b8a6 100%);
+    color:var(--forest);
+    box-shadow:0 4px 0 #0f766e, 0 10px 18px rgba(20,11,50,0.35), inset 0 2px 0 rgba(255,255,255,0.4);
+  }
+  .digit-confirm-no:active{ transform:translateY(3px); box-shadow:0 1px 0 #0f766e, inset 0 2px 0 rgba(255,255,255,0.4); }
 
   .manual-work-area{
     display:flex; align-items:center; justify-content:center;
@@ -1059,7 +1140,20 @@
   <div class="digit-picker-card">
     <div class="digit-picker-title">Elige un número</div>
     <div class="digit-picker-grid" id="digitPickerGrid"></div>
-    <button class="menu-btn digit-picker-close" id="digitPickerClose">Cerrar</button>
+    <div class="digit-picker-buttons">
+      <button class="menu-btn digit-picker-action" id="digitPickerAction">Insertar</button>
+      <button class="menu-btn digit-picker-cancel" id="digitPickerCancel">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="digit-confirm-overlay" id="digitConfirmOverlay">
+  <div class="digit-confirm-card">
+    <div class="digit-confirm-text" id="digitConfirmText">¿Deseas cambiar?</div>
+    <div class="digit-confirm-buttons">
+      <button class="menu-btn digit-confirm-yes" id="digitConfirmYes">Sí, cambiar</button>
+      <button class="menu-btn digit-confirm-no" id="digitConfirmNo">No, cancelar</button>
+    </div>
   </div>
 </div>
 
@@ -1795,8 +1889,17 @@ function manualMakeCell(col, row, extraClass){
 // llena para reemplazar el número elegido.
 const digitPickerOverlay = document.getElementById('digitPickerOverlay');
 const digitPickerGrid = document.getElementById('digitPickerGrid');
-const digitPickerClose = document.getElementById('digitPickerClose');
+const digitPickerAction = document.getElementById('digitPickerAction');
+const digitPickerCancel = document.getElementById('digitPickerCancel');
+const digitConfirmOverlay = document.getElementById('digitConfirmOverlay');
+const digitConfirmText = document.getElementById('digitConfirmText');
+const digitConfirmYes = document.getElementById('digitConfirmYes');
+const digitConfirmNo = document.getElementById('digitConfirmNo');
 let digitPickerTarget = null;
+let digitPickerPending = null;
+let digitPickerBtnEls = [];
+let digitPickerMode = 'insert';
+let digitPickerOldValue = '';
 
 function buildDigitPicker(){
   for(let d = 1; d <= 9; d++){
@@ -1804,38 +1907,76 @@ function buildDigitPicker(){
     btn.type = 'button';
     btn.className = 'digit-picker-btn';
     btn.textContent = String(d);
-    btn.addEventListener('click', () => selectDigit(d));
+    btn.addEventListener('click', () => selectDigit(d, btn));
     digitPickerGrid.appendChild(btn);
+    digitPickerBtnEls.push(btn);
   }
   const zeroBtn = document.createElement('button');
   zeroBtn.type = 'button';
   zeroBtn.className = 'digit-picker-btn zero';
   zeroBtn.textContent = '0';
-  zeroBtn.addEventListener('click', () => selectDigit(0));
+  zeroBtn.addEventListener('click', () => selectDigit(0, zeroBtn));
   digitPickerGrid.appendChild(zeroBtn);
+  digitPickerBtnEls.push(zeroBtn);
 }
 buildDigitPicker();
 
 function openDigitPicker(inp){
   digitPickerTarget = inp;
+  digitPickerPending = null;
+  digitPickerBtnEls.forEach(b => b.classList.remove('selected'));
+  digitPickerOldValue = String(inp && inp.value || '').trim();
+  const hasValue = digitPickerOldValue !== '';
+  digitPickerMode = hasValue ? 'modify' : 'insert';
+  digitPickerAction.textContent = hasValue ? 'Modificar' : 'Insertar';
+  digitPickerAction.classList.toggle('mode-modify', hasValue);
+  digitPickerAction.classList.toggle('mode-insert', !hasValue);
+  digitPickerCancel.classList.toggle('show-cancel', hasValue);
   digitPickerOverlay.classList.add('show');
   playClick();
 }
 function closeDigitPicker(){
   digitPickerOverlay.classList.remove('show');
+  digitConfirmOverlay.classList.remove('show');
   digitPickerTarget = null;
+  digitPickerPending = null;
 }
-function selectDigit(d){
-  if(digitPickerTarget){
-    digitPickerTarget.value = String(d);
+function selectDigit(d, btnEl){
+  digitPickerPending = d;
+  digitPickerBtnEls.forEach(b => b.classList.remove('selected'));
+  if(btnEl) btnEl.classList.add('selected');
+  playClick();
+}
+function applyDigitPickerChange(){
+  if(digitPickerTarget && digitPickerPending !== null){
+    digitPickerTarget.value = String(digitPickerPending);
     digitPickerTarget.dispatchEvent(new Event('input'));
   }
   playClick();
   closeDigitPicker();
 }
-digitPickerClose.addEventListener('click', () => { playClick(); closeDigitPicker(); });
+digitPickerAction.addEventListener('click', () => {
+  if(digitPickerPending === null){
+    playClick();
+    closeDigitPicker();
+    return;
+  }
+  if(digitPickerMode === 'modify'){
+    playClick();
+    digitConfirmText.textContent = '¿Deseas cambiar ' + digitPickerOldValue + ' por ' + digitPickerPending + '?';
+    digitConfirmOverlay.classList.add('show');
+  } else {
+    applyDigitPickerChange();
+  }
+});
+digitPickerCancel.addEventListener('click', () => { playClick(); closeDigitPicker(); });
 digitPickerOverlay.addEventListener('click', (e) => {
   if(e.target === digitPickerOverlay) closeDigitPicker();
+});
+digitConfirmYes.addEventListener('click', () => { applyDigitPickerChange(); });
+digitConfirmNo.addEventListener('click', () => { playClick(); digitConfirmOverlay.classList.remove('show'); });
+digitConfirmOverlay.addEventListener('click', (e) => {
+  if(e.target === digitConfirmOverlay){ playClick(); digitConfirmOverlay.classList.remove('show'); }
 });
 
 // Clases de color para cada "ronda" (cada dígito del multiplicador, de
