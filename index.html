@@ -464,6 +464,9 @@
     row-gap:6px;
     justify-content:center;
     position:relative;
+    --cell-h:54px; --cell-font:32px;
+    --input-w:42px; --input-font:20px;
+    --answer-w:50px; --answer-font:28px;
   }
   .manual-seq-overlay{
     position:absolute;
@@ -480,30 +483,39 @@
   }
   .manual-seq-line.round0{ stroke:var(--coral); }
   .manual-seq-line.round1{ stroke:var(--sky); }
+  .manual-seq-line.round2{ stroke:var(--leaf); }
+  .manual-seq-line.round3{ stroke:var(--sun-deep); }
   .manual-seq-clickable{ cursor:pointer; }
   .manual-cell{
     display:flex; align-items:center; justify-content:center;
     font-family:'Baloo 2',sans-serif;
-    font-size:32px;
+    font-size:var(--cell-font, 32px);
     font-weight:800;
     color:var(--forest);
-    height:54px;
+    height:var(--cell-h, 54px);
   }
   .manual-op-cell{ font-size:25px; }
   .manual-carry-input, .manual-answer-input{
-    width:42px; height:42px;
+    width:var(--input-w, 42px); height:var(--input-w, 42px);
     text-align:center;
     font-family:'Baloo 2',sans-serif;
     font-weight:800;
     border:2px solid var(--leaf-light);
     border-radius:10px;
-    font-size:20px;
+    font-size:var(--input-font, 20px);
     color:var(--coral);
     background:#eefaf6;
   }
+  .manual-carry-input-sum{
+    width:calc(var(--input-w, 42px) + 8px); height:calc(var(--input-w, 42px) + 8px);
+    font-size:calc(var(--input-font, 20px) + 5px);
+    color:var(--leaf);
+    border-color:var(--leaf);
+    background:#f1eafd;
+  }
   .manual-answer-input{
-    width:50px; height:56px;
-    font-size:28px;
+    width:var(--answer-w, 50px); height:calc(var(--answer-w, 50px) + 6px);
+    font-size:var(--answer-font, 28px);
     color:var(--forest);
     border-color:var(--sun);
     background:#fff6e0;
@@ -515,6 +527,14 @@
   .manual-answer-input.answer-blue{
     border-color:var(--sky);
     background:#e6f7fb;
+  }
+  .manual-answer-input.answer-purple{
+    border-color:var(--leaf);
+    background:#f1eafd;
+  }
+  .manual-answer-input.answer-gold{
+    border-color:var(--sun-deep);
+    background:#fff2dc;
   }
   .manual-line-row{
     border-top:3px solid var(--forest);
@@ -537,6 +557,16 @@
     color:#ffffff;
     background:var(--sky);
     box-shadow:0 3px 0 #1a9db3;
+  }
+  .manual-digit-done3{
+    color:#ffffff;
+    background:var(--leaf);
+    box-shadow:0 3px 0 #6a3fc7;
+  }
+  .manual-digit-done4{
+    color:#ffffff;
+    background:var(--sun-deep);
+    box-shadow:0 3px 0 #b5790a;
   }
   .manual-close-btn{
     margin-top:26px;
@@ -597,10 +627,68 @@
 
   .carry-hidden{ display:none !important; }
 
+  .digit-picker-overlay{
+    position:fixed; inset:0;
+    background:rgba(20,12,48,0.75);
+    display:flex; align-items:center; justify-content:center;
+    z-index:200;
+    opacity:0; pointer-events:none;
+    transition:opacity .18s;
+    padding:24px;
+  }
+  .digit-picker-overlay.show{ opacity:1; pointer-events:auto; }
+  .digit-picker-card{
+    background:var(--cream);
+    border-radius:22px;
+    padding:22px;
+    box-shadow:0 10px 0 rgba(0,0,0,0.25);
+    display:flex; flex-direction:column; align-items:center;
+    gap:14px;
+  }
+  .digit-picker-title{
+    font-family:'Baloo 2',sans-serif;
+    font-weight:800;
+    color:var(--forest);
+    font-size:17px;
+  }
+  .digit-picker-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 58px);
+    gap:10px;
+  }
+  .digit-picker-btn{
+    width:58px; height:58px;
+    border-radius:14px;
+    border:2px solid var(--leaf-light);
+    background:#eefaf6;
+    font-family:'Baloo 2',sans-serif;
+    font-size:26px;
+    font-weight:800;
+    color:var(--forest);
+    cursor:pointer;
+    box-shadow:0 3px 0 var(--leaf-light);
+  }
+  .digit-picker-btn:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--leaf-light); }
+  .digit-picker-btn.zero{ grid-column:2; }
+  .digit-picker-close{
+    margin-top:2px;
+    width:auto;
+    display:inline-block;
+    padding:10px 26px;
+    font-size:15px;
+  }
+
   .manual-work-area{
     display:flex; align-items:center; justify-content:center;
     gap:14px;
     margin:0 0 2px;
+  }
+  .mp-board{
+    background:linear-gradient(160deg, #fffdf9 0%, #fff3df 100%);
+    border-radius:22px;
+    padding:20px 12px;
+    box-shadow:0 10px 22px rgba(20,11,50,0.4), inset 0 0 0 2px rgba(255,200,87,0.4);
+    overflow-x:auto;
   }
 
   .celebrate-overlay{
@@ -839,13 +927,13 @@
     <button id="menuPlayBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg> Jugar (tablas del 1 al 12)</button>
     <button id="menuSelectBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg> Elegir una tabla</button>
     <button id="menuStampsBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v1.5a1.5 1.5 0 000 3V14a2 2 0 01-2 2H5a2 2 0 01-2-2v-1.5a1.5 1.5 0 000-3V8z"/><line x1="9" y1="6" x2="9" y2="16" stroke-dasharray="2,2"/></svg> Ver mis estampillas</button>
+    <button id="menuMultiplyBtn" class="menu-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 21l1.5-5.5L15.5 4.5a1.5 1.5 0 012.12 0l1.88 1.88a1.5 1.5 0 010 2.12L8.5 19.5 3 21z"/><line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/></svg> Multipliquemos</button>
   </div>
 
   <div id="selectTableScreen" class="screen" style="display:none;">
     <p class="menu-title">Elige la tabla que quieres practicar</p>
     <p class="stars-legend"><span class="seq"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 17.27l-5.81 3.1 1.11-6.47-4.7-4.58 6.5-.94L12 2.5z"/></svg> Jugar</span> &nbsp;·&nbsp; <span class="manual"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 5.88 6.5.94-4.7 4.58 1.11 6.47L12 17.27l-5.81 3.1 1.11-6.47-4.7-4.58 6.5-.94L12 2.5z"/></svg> Manual</span></p>
     <div class="select-grid" id="selectChips"></div>
-    <button id="selectPlayBtn" class="menu-btn">Jugar esta tabla</button>
     <button id="selectBackBtn" class="menu-btn secondary"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Regresar al menú</button>
   </div>
 
@@ -863,6 +951,38 @@
     </div>
 
     <button id="stampsBackBtn" class="menu-btn secondary" style="margin-top:14px;"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Regresar al menú</button>
+  </div>
+
+  <div id="multiplyConfigScreen" class="screen" style="display:none;">
+    <p class="menu-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 21l1.5-5.5L15.5 4.5a1.5 1.5 0 012.12 0l1.88 1.88a1.5 1.5 0 010 2.12L8.5 19.5 3 21z"/><line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/></svg> Multipliquemos</p>
+    <p class="stars-legend" style="margin:-2px 0 10px;">Elige cuántas cifras tendrá cada número</p>
+    <p class="stamp-section-title manual" style="margin-top:0;">Multiplicando</p>
+    <div class="chips" id="mpDigitsAChips">
+      <button type="button" class="chip" data-digits="1">1 cifra</button>
+      <button type="button" class="chip active" data-digits="2">2 cifras</button>
+      <button type="button" class="chip" data-digits="3">3 cifras</button>
+      <button type="button" class="chip" data-digits="4">4 cifras</button>
+    </div>
+    <p class="stamp-section-title manual">Multiplicador</p>
+    <div class="chips" id="mpDigitsBChips">
+      <button type="button" class="chip active" data-digits="1">1 cifra</button>
+      <button type="button" class="chip" data-digits="2">2 cifras</button>
+      <button type="button" class="chip" data-digits="3">3 cifras</button>
+      <button type="button" class="chip" data-digits="4">4 cifras</button>
+    </div>
+    <button id="mpStartBtn" class="menu-btn" style="margin-top:10px;"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z"/></svg> Comenzar</button>
+    <button id="mpConfigBackBtn" class="menu-btn secondary"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Regresar al menú</button>
+  </div>
+
+  <div id="multiplyScreen" class="screen" style="display:none;">
+    <div style="text-align:center;margin-bottom:10px;">
+      <button id="mpMenuBtn" class="chip" style="font-size:14px;"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Menú</button>
+    </div>
+    <p class="menu-title"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 21l1.5-5.5L15.5 4.5a1.5 1.5 0 012.12 0l1.88 1.88a1.5 1.5 0 010 2.12L8.5 19.5 3 21z"/><line x1="13.5" y1="6.5" x2="17.5" y2="10.5"/></svg> Resuelve la multiplicación</p>
+    <div class="manual-work-area mp-board">
+      <div class="manual-grid" id="mpGrid"></div>
+    </div>
+    <button id="mpCheckBtn" class="menu-btn" style="margin-top:24px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Comprobar resultado</button>
   </div>
 
   <div id="gameScreen" class="screen" style="display:none;">
@@ -907,6 +1027,17 @@
   </div>
 </div>
 
+<div class="celebrate-overlay" id="mpResultOverlay">
+  <h2 id="mpResultTitle">¡Correcto!</h2>
+  <p id="mpResultText">La multiplicación está bien resuelta.</p>
+  <div class="overlay-actions">
+    <button class="again-btn" id="mpResultNewBtn"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L7 6l5 5V7a5 5 0 11-4.9 6h-2.07A7 7 0 1012 4z"/></svg> Nuevo ejercicio</button>
+    <button class="again-btn secondary" id="mpResultRetryBtn" style="display:none;"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L7 6l5 5V7a5 5 0 11-4.9 6h-2.07A7 7 0 1012 4z"/></svg> Intentar de nuevo</button>
+    <button class="again-btn secondary" id="mpResultConfigBtn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg> Configuración</button>
+    <button class="again-btn secondary" id="mpResultMenuBtn"><svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l4.88-4.88a1 1 0 10-1.42-1.41l-6.59 6.58a1 1 0 000 1.42l6.59 6.58a1 1 0 001.42-1.41L7.83 13H20a1 1 0 000-2z"/></svg> Salir al menú principal</button>
+  </div>
+</div>
+
 <div class="stamp-lightbox" id="stampLightbox">
   <img id="stampLightboxImg" src="" alt="">
   <div class="lightbox-label" id="stampLightboxLabel"></div>
@@ -921,6 +1052,14 @@
     </div>
     <button class="menu-btn manual-swap-btn" id="manualSwapBtn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10l-3-3"/><path d="M7 7l3 3"/><path d="M17 17H7l3 3"/><path d="M17 17l-3-3"/></svg> Girar factores</button>
     <button class="menu-btn manual-close-btn" id="manualCloseBtn">Cerrar</button>
+  </div>
+</div>
+
+<div class="digit-picker-overlay" id="digitPickerOverlay">
+  <div class="digit-picker-card">
+    <div class="digit-picker-title">Elige un número</div>
+    <div class="digit-picker-grid" id="digitPickerGrid"></div>
+    <button class="menu-btn digit-picker-close" id="digitPickerClose">Cerrar</button>
   </div>
 </div>
 
@@ -959,7 +1098,6 @@ const menuPlayBtn = document.getElementById('menuPlayBtn');
 const menuSelectBtn = document.getElementById('menuSelectBtn');
 const menuStampsBtn = document.getElementById('menuStampsBtn');
 const selectChipsEl = document.getElementById('selectChips');
-const selectPlayBtn = document.getElementById('selectPlayBtn');
 const selectBackBtn = document.getElementById('selectBackBtn');
 const stampsBackBtn = document.getElementById('stampsBackBtn');
 const stampCollectionViewSeqEl = document.getElementById('stampCollectionViewSeq');
@@ -970,7 +1108,7 @@ const retryBtn = document.getElementById('retryBtn');
 const overlayMenuBtn = document.getElementById('overlayMenuBtn');
 const manualBtn = document.getElementById('manualBtn');
 const manualMultOverlay = document.getElementById('manualMultOverlay');
-const manualGrid = document.getElementById('manualGrid');
+let manualGrid = document.getElementById('manualGrid');
 const manualCloseBtn = document.getElementById('manualCloseBtn');
 const manualSwapBtn = document.getElementById('manualSwapBtn');
 
@@ -1237,8 +1375,9 @@ function buildSelectTableScreen(){
       playClick();
       selectedTable = t;
       currentTable = t;
-      document.querySelectorAll('.table-card').forEach(c=>c.classList.remove('active'));
-      card.classList.add('active');
+      gameMode = 'single';
+      showScreen('gameScreen');
+      buildRound();
     });
     selectChipsEl.appendChild(card);
   }
@@ -1247,7 +1386,7 @@ buildSelectTableScreen();
 
 // ---- Navegación entre pantallas (perfiles / menú / elegir tabla / estampillas / juego) ----
 function showScreen(id){
-  [profileScreenEl, profileCreateScreenEl, menuScreenEl, selectTableScreenEl, stampsScreenEl, gameScreenEl].forEach(el=>{
+  [profileScreenEl, profileCreateScreenEl, menuScreenEl, selectTableScreenEl, stampsScreenEl, multiplyConfigScreenEl, multiplyScreenEl, gameScreenEl].forEach(el=>{
     el.style.display = (el.id === id) ? '' : 'none';
   });
 }
@@ -1370,14 +1509,6 @@ menuSelectBtn.addEventListener('click', ()=>{
 selectBackBtn.addEventListener('click', ()=>{
   playClick();
   showScreen('menuScreen');
-});
-
-selectPlayBtn.addEventListener('click', ()=>{
-  playClick();
-  gameMode = 'single';
-  currentTable = selectedTable;
-  showScreen('gameScreen');
-  buildRound();
 });
 
 menuStampsBtn.addEventListener('click', ()=>{
@@ -1659,7 +1790,167 @@ function manualMakeCell(col, row, extraClass){
   return cell;
 }
 
+// Selector de números (0-9) que se abre al presionar cualquier casilla de
+// resultado o de llevada. Se puede volver a abrir sobre una casilla ya
+// llena para reemplazar el número elegido.
+const digitPickerOverlay = document.getElementById('digitPickerOverlay');
+const digitPickerGrid = document.getElementById('digitPickerGrid');
+const digitPickerClose = document.getElementById('digitPickerClose');
+let digitPickerTarget = null;
+
+function buildDigitPicker(){
+  for(let d = 1; d <= 9; d++){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'digit-picker-btn';
+    btn.textContent = String(d);
+    btn.addEventListener('click', () => selectDigit(d));
+    digitPickerGrid.appendChild(btn);
+  }
+  const zeroBtn = document.createElement('button');
+  zeroBtn.type = 'button';
+  zeroBtn.className = 'digit-picker-btn zero';
+  zeroBtn.textContent = '0';
+  zeroBtn.addEventListener('click', () => selectDigit(0));
+  digitPickerGrid.appendChild(zeroBtn);
+}
+buildDigitPicker();
+
+function openDigitPicker(inp){
+  digitPickerTarget = inp;
+  digitPickerOverlay.classList.add('show');
+  playClick();
+}
+function closeDigitPicker(){
+  digitPickerOverlay.classList.remove('show');
+  digitPickerTarget = null;
+}
+function selectDigit(d){
+  if(digitPickerTarget){
+    digitPickerTarget.value = String(d);
+    digitPickerTarget.dispatchEvent(new Event('input'));
+  }
+  playClick();
+  closeDigitPicker();
+}
+digitPickerClose.addEventListener('click', () => { playClick(); closeDigitPicker(); });
+digitPickerOverlay.addEventListener('click', (e) => {
+  if(e.target === digitPickerOverlay) closeDigitPicker();
+});
+
+// Clases de color para cada "ronda" (cada dígito del multiplicador, de
+// derecha a izquierda). Antes solo existían 2 rondas (unidades/decenas);
+// ahora se admiten hasta 4 para soportar multiplicadores de hasta 4 cifras.
+const ROUND_DONE_CLASSES = ['manual-digit-done', 'manual-digit-done2', 'manual-digit-done3', 'manual-digit-done4'];
+const ROUND_ANSWER_CLASSES = ['answer-red', 'answer-blue', 'answer-purple', 'answer-gold'];
+const ROUND_LINE_CLASSES = ['round0', 'round1', 'round2', 'round3'];
+
+// Ajusta el tamaño de columnas/celdas/fuentes según cuántas columnas de
+// dígitos (W) requiere el ejercicio, para que quepa en pantallas angostas
+// aunque haya hasta 4+4=8 columnas.
+function configureManualGridSize(W){
+  let cellW, cellH, cellFont, inputW, inputFont, answerW, answerFont, labelW;
+  if(W <= 3){ cellW=54; cellH=54; cellFont=32; inputW=42; inputFont=20; answerW=50; answerFont=28; labelW=40; }
+  else if(W === 4){ cellW=46; cellH=48; cellFont=27; inputW=36; inputFont=17; answerW=42; answerFont=24; labelW=34; }
+  else if(W === 5){ cellW=40; cellH=44; cellFont=23; inputW=32; inputFont=15; answerW=37; answerFont=21; labelW=30; }
+  else if(W === 6){ cellW=35; cellH=40; cellFont=20; inputW=28; inputFont=13; answerW=32; answerFont=18; labelW=27; }
+  else if(W === 7){ cellW=31; cellH=37; cellFont=17; inputW=25; inputFont=12; answerW=28; answerFont=16; labelW=24; }
+  else { cellW=28; cellH=34; cellFont=15; inputW=22; inputFont=11; answerW=25; answerFont=14; labelW=22; }
+  manualGrid.style.gridTemplateColumns = labelW + 'px repeat(' + W + ', ' + cellW + 'px)';
+  manualGrid.style.setProperty('--cell-h', cellH + 'px');
+  manualGrid.style.setProperty('--cell-font', cellFont + 'px');
+  manualGrid.style.setProperty('--input-w', inputW + 'px');
+  manualGrid.style.setProperty('--input-font', inputFont + 'px');
+  manualGrid.style.setProperty('--answer-w', answerW + 'px');
+  manualGrid.style.setProperty('--answer-font', answerFont + 'px');
+}
+
+// Devuelve el dígito de "value" (desplazado "shift" columnas a la izquierda,
+// por ser un producto parcial) que cae en la columna absoluta "col" de una
+// cuadrícula de W columnas de dígitos, o 0 si ese producto no llega a esa
+// columna.
+function partialDigitAt(value, shift, col, W){
+  const p = (W + 1) - shift - col; // posición dentro de "value": 0 = unidades
+  if(p < 0) return 0;
+  const s = String(value);
+  const idx = s.length - 1 - p;
+  if(idx < 0 || idx >= s.length) return 0;
+  return Number(s[idx]);
+}
+
+// Calcula en qué columnas absolutas se genera una llevada real al multiplicar
+// "a" (de varias cifras) por el dígito "digit" de un producto parcial
+// desplazado "shift" columnas, para no dibujar casillas de llevada donde no
+// hace falta ninguna.
+function manualCarryColsMultiply(a, digit, W, shift){
+  const digitsA = String(a).length;
+  const aDigits = String(a).split('').reverse().map(Number);
+  let carry = 0;
+  const cols = [];
+  for(let p = 0; p < digitsA; p++){
+    const prod = aDigits[p] * digit + carry;
+    carry = Math.floor(prod / 10);
+    // Si esta es la última cifra de "a", el carry no se suma a ninguna cifra
+    // siguiente (no existe): pasa directo al resultado como su propio dígito,
+    // así que no hace falta casilla de llevada para él.
+    if(carry > 0 && (p + 1) < digitsA){
+      const col = (W + 1) - shift - (p + 1);
+      if(col >= 2) cols.push(col);
+    }
+  }
+  return cols;
+}
+
+// Indica si al multiplicar el último dígito (el más a la izquierda) de "a"
+// por "digit" —arrastrando el carry de los dígitos anteriores— el resultado
+// llega a una cifra extra (>=10 en esa posición). Esa cifra extra no tiene
+// casilla de llevada propia (no hay más dígitos de "a" a los que sumarla),
+// pero sí ocupa una columna más en la fila de respuesta del producto parcial.
+// Se calcula aparte de manualCarryColsMultiply porque esa función ya no
+// incluye el carry del último dígito (ver comentario más arriba).
+function manualLastDigitOverflows(a, digit){
+  const digitsA = String(a).length;
+  const aDigits = String(a).split('').reverse().map(Number);
+  let carry = 0;
+  for(let p = 0; p < digitsA; p++){
+    const prod = aDigits[p] * digit + carry;
+    carry = Math.floor(prod / 10);
+  }
+  return carry > 0;
+}
+
+// Columnas absolutas que ocupa el producto parcial a×digit (desplazado
+// "shift" columnas): siempre las columnas base de "a" (aunque algún dígito
+// resulte 0), más una columna extra a la izquierda si esa multiplicación
+// genera una llevada hacia una cifra nueva.
+function manualMultiplyAnswerCols(a, digit, W, shift){
+  const digitsA = String(a).length;
+  const cols = [];
+  for(let p = digitsA - 1; p >= 0; p--){
+    cols.push((W + 1) - shift - p);
+  }
+  const overflowCol = (W + 1) - shift - digitsA;
+  if(manualLastDigitOverflows(a, digit)) cols.unshift(overflowCol);
+  return cols;
+}
+
+// Simula la suma columna por columna de todos los productos parciales
+// (cada uno desplazado según su posición) para saber en qué columnas la
+// suma final genera una llevada real.
+function manualCarryColsSum(partials, W){
+  let carry = 0;
+  const cols = [];
+  for(let col = W + 1; col >= 2; col--){
+    let colSum = carry;
+    partials.forEach((val, i) => { colSum += partialDigitAt(val, i, col, W); });
+    carry = Math.floor(colSum / 10);
+    if(carry > 0 && (col - 1) >= 2) cols.push(col - 1);
+  }
+  return cols;
+}
+
 function manualAddCarryRow(row, cols, sectionId){
+  if(!cols.length) return false;
   const cbCell = manualMakeCell(1, row, 'manual-carry-check-cell');
   const label = document.createElement('label');
   label.className = 'carry-check-label';
@@ -1687,32 +1978,29 @@ function manualAddCarryRow(row, cols, sectionId){
   cbCell.appendChild(label);
 
   const sectionVisible = !!manualCarriesState[sectionId];
-  for(let col = 2; col <= 4; col++){
+  cols.forEach(col => {
     const cell = manualMakeCell(col, row, 'carry-section-' + sectionId + (sectionVisible ? '' : ' carry-hidden'));
-    if(cols.includes(col)){
-      const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.inputMode = 'none';
-      inp.readOnly = true;
-      inp.maxLength = 1;
-      inp.className = 'manual-carry-input';
-      inp.setAttribute('aria-label', 'Llevada');
-      // Al presionar la casilla, el valor va cambiando 0,1,2...9 y vuelve a
-      // empezar en 0, sin fin, igual que en las casillas de resultado.
-      inp.addEventListener('click', () => {
-        const cur = inp.value === '' ? -1 : parseInt(inp.value, 10);
-        inp.value = String((cur + 1) % 10);
-        playClick();
-      });
-      cell.appendChild(inp);
-    }
-  }
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.inputMode = 'none';
+    inp.readOnly = true;
+    inp.maxLength = 1;
+    inp.className = 'manual-carry-input' + (sectionId === 'sum' ? ' manual-carry-input-sum' : '');
+    inp.setAttribute('aria-label', 'Llevada');
+    // Al presionar la casilla se abre el selector de números (0-9); al
+    // volver a presionarla se puede elegir otro número para reemplazarlo.
+    inp.addEventListener('click', () => {
+      openDigitPicker(inp);
+    });
+    cell.appendChild(inp);
+  });
+  return true;
 }
 
-function manualAddStaticNumberRow(row, value, toggleable, hasSecondRound){
-  const digits = String(value).padStart(3, ' ').split('');
+function manualAddStaticNumberRow(row, value, toggleable, W){
+  const digits = String(value).padStart(W, ' ').split('');
   const cells = [];
-  for(let col = 2; col <= 4; col++){
+  for(let col = 2; col <= W + 1; col++){
     const cell = manualMakeCell(col, row);
     const d = digits[col - 2];
     cell.textContent = (d === ' ' || d === undefined) ? '' : d;
@@ -1731,13 +2019,13 @@ function manualAddStaticNumberRow(row, value, toggleable, hasSecondRound){
 
 
 
-function manualAddSymbolRow(row, symbol, value, hasSecondRound){
+function manualAddSymbolRow(row, symbol, value, W, digitsB){
   const symCell = manualMakeCell(1, row, 'manual-op-cell');
   symCell.innerHTML = symbol;
-  if(hasSecondRound){
-    manualAddBottomNumberRow(row, value);
+  if(digitsB > 1){
+    manualAddBottomNumberRow(row, value, W);
   } else {
-    const cells = manualAddStaticNumberRow(row, value);
+    const cells = manualAddStaticNumberRow(row, value, false, W);
     const bottomCell = cells[cells.length - 1];
     manualBottomToggleCells[0] = bottomCell;
     bottomCell.classList.add('manual-seq-clickable');
@@ -1748,17 +2036,18 @@ function manualAddSymbolRow(row, symbol, value, hasSecondRound){
   }
 }
 
-// Número de abajo (multiplicador) cuando tiene dos cifras: cada dígito es pulsable
-// para elegir con cuál se está multiplicando. Unidades = ronda 0 (rojo), decenas = ronda 1 (azul).
-function manualAddBottomNumberRow(row, value){
-  const digits = String(value).padStart(3, ' ').split('');
-  for(let col = 2; col <= 4; col++){
+// Número de abajo (multiplicador) cuando tiene 2 a 4 cifras: cada dígito es pulsable
+// para elegir con cuál se está multiplicando. Unidades = ronda 0, decenas = ronda 1,
+// centenas = ronda 2, millares = ronda 3 (cada una con su propio color).
+function manualAddBottomNumberRow(row, value, W){
+  const digits = String(value).padStart(W, ' ').split('');
+  for(let col = 2; col <= W + 1; col++){
     const cell = manualMakeCell(col, row);
     const d = digits[col - 2];
     cell.textContent = (d === ' ' || d === undefined) ? '' : d;
     if(cell.textContent !== ''){
       cell.classList.add('manual-digit-toggle');
-      const roundForCell = (col === 4) ? 0 : 1;
+      const roundForCell = (W + 1) - col;
       manualBottomToggleCells[roundForCell] = cell;
       cell.addEventListener('click', () => {
         playClick();
@@ -1778,13 +2067,15 @@ function manualAddBottomNumberRow(row, value){
   }
 }
 
-// Activa la ronda indicada: colorea el dígito de abajo correspondiente (rojo=ronda 0, azul=ronda 1),
-// apaga el color del otro dígito de abajo, y los números de arriba vuelven a su color original.
+// Activa la ronda indicada: colorea el dígito de abajo correspondiente con el color
+// de esa ronda, apaga el color de los demás dígitos de abajo, y los números de
+// arriba vuelven a su color original.
 function manualSelectRound(newRound){
   manualDigitRound = newRound;
-  if(manualBottomToggleCells[0]) manualBottomToggleCells[0].classList.toggle('manual-digit-done', newRound === 0);
-  if(manualBottomToggleCells[1]) manualBottomToggleCells[1].classList.toggle('manual-digit-done2', newRound === 1);
-  manualTopToggleCells.forEach(c => c.classList.remove('manual-digit-done', 'manual-digit-done2'));
+  ROUND_DONE_CLASSES.forEach((cls, idx) => {
+    if(manualBottomToggleCells[idx]) manualBottomToggleCells[idx].classList.toggle(cls, newRound === idx);
+  });
+  manualTopToggleCells.forEach(c => c.classList.remove(...ROUND_DONE_CLASSES));
   manualSeqRound = newRound;
   manualSeqPtr = 0;
   manualSeqDone = false;
@@ -1796,29 +2087,27 @@ function manualAddSymbolOnly(row, symbol){
   symCell.innerHTML = symbol;
 }
 
-function manualAddLineRow(row){
+function manualAddLineRow(row, W){
   const line = manualMakeCell(2, row);
   line.className = 'manual-line-row';
-  line.style.gridColumn = '2 / 5';
+  line.style.gridColumn = '2 / ' + (W + 2);
 }
 
 let manualAllAnswerInputs = [];
-function manualAddAnswerRow(row, startCol, width, extraClass){
+function manualAddAnswerRow(row, cols, extraClass){
   const inputs = [];
-  for(let col = 2; col <= 4; col++){
+  cols.forEach(col => {
     const cell = manualMakeCell(col, row);
-    if(col >= startCol && col < startCol + width){
-      const inp = document.createElement('input');
-      inp.type = 'text';
-      inp.inputMode = 'none';
-      inp.readOnly = true;
-      inp.maxLength = 1;
-      inp.className = 'manual-answer-input' + (extraClass ? ' ' + extraClass : '');
-      inp.setAttribute('aria-label', 'Dígito de la respuesta');
-      cell.appendChild(inp);
-      inputs.push(inp);
-    }
-  }
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.inputMode = 'none';
+    inp.readOnly = true;
+    inp.maxLength = 1;
+    inp.className = 'manual-answer-input' + (extraClass ? ' ' + extraClass : '');
+    inp.setAttribute('aria-label', 'Dígito de la respuesta');
+    cell.appendChild(inp);
+    inputs.push(inp);
+  });
   inputs.forEach((inp, idx) => {
     inp.addEventListener('input', () => {
       inp.value = inp.value.replace(/[^0-9]/g, '').slice(0, 1);
@@ -1826,12 +2115,10 @@ function manualAddAnswerRow(row, startCol, width, extraClass){
     inp.addEventListener('keydown', (e) => {
       if(e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx - 1].focus();
     });
-    // Al presionar la casilla, el valor va cambiando 0,1,2...9 y vuelve a
-    // empezar en 0, sin fin.
+    // Al presionar la casilla se abre el selector de números (0-9); al
+    // volver a presionarla se puede elegir otro número para reemplazarlo.
     inp.addEventListener('click', () => {
-      const cur = inp.value === '' ? -1 : parseInt(inp.value, 10);
-      inp.value = String((cur + 1) % 10);
-      playClick();
+      openDigitPicker(inp);
     });
   });
   manualAllAnswerInputs = manualAllAnswerInputs.concat(inputs);
@@ -1849,38 +2136,69 @@ function buildManualGrid(a, b){
   manualSeqPtr = 0;
   manualSeqDone = false;
   manualSeqOverlaySvg = null;
-  const bIsTwoDigits = String(b).length > 1;
-  manualBIsTwoDigits = bIsTwoDigits;
+  manualFinalRowLength = 0;
+
+  const digitsA = String(a).length;
+  const digitsB = String(b).length;
+  manualBDigitCount = digitsB;
+  // Ancho total de columnas de dígitos: el producto de un número de digitsA
+  // cifras por uno de digitsB cifras nunca tiene más de digitsA+digitsB cifras.
+  const W = digitsA + digitsB;
+  configureManualGridSize(W);
   let row = 1;
 
-  // Fila de llevadas para el primer producto, arriba de las centenas y decenas del número de arriba
-  manualAddCarryRow(row, [2, 3], 'top'); row++;
+  // Dígitos del multiplicador (de derecha a izquierda) y su producto parcial real,
+  // para saber en qué columnas hace falta una casilla de llevada y en cuáles no.
+  const bDigits = String(b).split('').reverse().map(Number);
+  const partials = bDigits.map(d => a * d);
+
+  // Fila de llevadas para el primer producto, arriba del número de arriba
+  if(manualAddCarryRow(row, manualCarryColsMultiply(a, bDigits[0], W, 0), 'top')) row++;
   // Número de arriba (multiplicando): dígitos pulsables para marcar cuáles ya se multiplicaron
-  // hasSecondRound=true cuando el multiplicador tiene dos cifras, para alternar color rosa -> celeste entre rondas
-  const manualTopCellsRow = manualAddStaticNumberRow(row, a, true, bIsTwoDigits); row++;
+  const manualTopCellsRow = manualAddStaticNumberRow(row, a, true, W); row++;
   // Secuencia automática guiada: orden de derecha a izquierda (unidades primero)
   manualSeqTopCells = manualTopCellsRow.filter(c => c.textContent !== '').reverse();
   // Símbolo de multiplicar y el multiplicador
-  manualAddSymbolRow(row, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>', b, bIsTwoDigits); row++;
+  manualAddSymbolRow(row, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>', b, W, digitsB); row++;
   // Línea divisoria
-  manualAddLineRow(row); row++;
+  manualAddLineRow(row, W); row++;
 
-  if(!bIsTwoDigits){
+  if(digitsB === 1){
     // Multiplicador de una cifra: una sola fila de respuesta
-    manualAddAnswerRow(row, 2, 3);
+    const cols = manualMultiplyAnswerCols(a, b, W, 0);
+    manualAddAnswerRow(row, cols);
+    manualFinalRowLength = cols.length;
   } else {
-    // Multiplicador de dos cifras: dos productos parciales + suma
-    manualAddAnswerRow(row, 2, 3, 'answer-red'); row++; // producto parcial 1 (a × unidades de b)
-    manualAddCarryRow(row, [2, 3], 'mid'); row++; // llevadas del segundo producto parcial
-    manualAddSymbolOnly(row, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'); // símbolo + para indicar la suma, en la misma fila del producto 2
-    manualAddAnswerRow(row, 2, 2, 'answer-blue'); row++; // producto parcial 2 (a × decenas de b), corrido una casilla a la izquierda
-    manualAddLineRow(row); row++; // línea de la suma
-    manualAddCarryRow(row, [2, 3], 'sum'); row++; // llevadas de la suma final
-    manualAddAnswerRow(row, 2, 3); // resultado final
+    // Multiplicador de 2 a 4 cifras: un producto parcial por cada dígito, cada
+    // uno desplazado una columna más a la izquierda, más la suma final.
+    for(let i = 0; i < digitsB; i++){
+      const cols = manualMultiplyAnswerCols(a, bDigits[i], W, i);
+      manualAddAnswerRow(row, cols, ROUND_ANSWER_CLASSES[i]); row++;
+      if(i < digitsB - 1){
+        // Llevadas del siguiente producto parcial, y el símbolo + solo en el último
+        const isLastPartial = (i === digitsB - 2);
+        if(manualAddCarryRow(row, manualCarryColsMultiply(a, bDigits[i + 1], W, i + 1), 'mid' + (i + 1))) row++;
+        if(isLastPartial){
+          manualAddSymbolOnly(row, '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>');
+        }
+      }
+    }
+    manualAddLineRow(row, W); row++; // línea de la suma
+    if(manualAddCarryRow(row, manualCarryColsSum(partials, W), 'sum')) row++; // llevadas de la suma final
+    // El resultado real puede tener menos cifras que el máximo teórico
+    // (digitsA + digitsB): por ejemplo 134×105=14070 tiene 5 cifras aunque
+    // el máximo sería 6. Usamos solo las columnas que hacen falta, alineadas
+    // a la derecha, para no dejar una casilla vacía de más pidiendo un cero
+    // inicial que no tiene sentido escribir.
+    const productDigits = String(a * b).length;
+    const finalCols = [];
+    for(let col = (W + 1) - productDigits + 1; col <= W + 1; col++) finalCols.push(col);
+    manualAddAnswerRow(row, finalCols); // resultado final: ocupa solo las columnas necesarias
+    manualFinalRowLength = finalCols.length;
   }
 
   manualInitSeqOverlay();
-  if(bIsTwoDigits) manualSelectRound(0);
+  if(digitsB > 1) manualSelectRound(0);
   manualRenderSeqOverlay();
 
   setTimeout(() => {
@@ -1892,13 +2210,14 @@ let manualA = 0, manualB = 0;
 let manualTopToggleCells = [];
 let manualBottomToggleCells = {};
 let manualDigitRound = 0;
-let manualCarriesState = { top:false, mid:false, sum:false };
+let manualCarriesState = { top:false, mid:false, sum:true };
 let manualSeqTopCells = [];
 let manualSeqRound = 0;
 let manualSeqPtr = 0;
 let manualSeqDone = false;
 let manualSeqOverlaySvg = null;
-let manualBIsTwoDigits = false;
+let manualBDigitCount = 1;
+let manualFinalRowLength = 0;
 
 // Secuencia automática guiada: círculo sobre el número de arriba y el número de abajo que se están
 // multiplicando, unidos por una línea. Al tocar el número de abajo activo, la secuencia avanza al
@@ -1920,12 +2239,13 @@ function manualSeqOnTopClick(cell){
   if(idx === -1) return;
   const samePointer = !manualSeqDone && manualSeqPtr === idx;
   if(samePointer){
-    if(manualBIsTwoDigits){
-      const newRound = manualSeqRound === 0 ? 1 : 0;
+    if(manualBDigitCount > 1){
+      const newRound = (manualSeqRound + 1) % manualBDigitCount;
       manualDigitRound = newRound;
       manualSeqRound = newRound;
-      if(manualBottomToggleCells[0]) manualBottomToggleCells[0].classList.toggle('manual-digit-done', newRound === 0);
-      if(manualBottomToggleCells[1]) manualBottomToggleCells[1].classList.toggle('manual-digit-done2', newRound === 1);
+      ROUND_DONE_CLASSES.forEach((cls, i) => {
+        if(manualBottomToggleCells[i]) manualBottomToggleCells[i].classList.toggle(cls, newRound === i);
+      });
     }
   } else {
     manualSeqPtr = idx;
@@ -1937,20 +2257,14 @@ function manualSeqOnTopClick(cell){
 function manualSeqAdvance(){
   manualSeqPtr++;
   if(manualSeqPtr >= manualSeqTopCells.length){
-    if(manualBIsTwoDigits){
-      if(manualSeqRound === 0){
-        manualSeqRound = 1;
-        manualSeqPtr = 0;
-        manualSelectRound(1);
-        return;
-      } else {
-        // Terminó la ronda azul (decenas): vuelve a la ronda roja (unidades)
-        // y el recorrido sigue así indefinidamente, igual que con 1 cifra.
-        manualSeqRound = 0;
-        manualSeqPtr = 0;
-        manualSelectRound(0);
-        return;
-      }
+    if(manualBDigitCount > 1){
+      // Termina el recorrido de esta ronda: pasa a la siguiente ronda (o
+      // vuelve a la primera si ya era la última), y el ciclo sigue así
+      // indefinidamente.
+      const newRound = (manualSeqRound + 1) % manualBDigitCount;
+      manualSeqRound = newRound;
+      manualSelectRound(newRound);
+      return;
     } else {
       // Multiplicador de una sola cifra: el recorrido no termina, vuelve a
       // empezar desde el primer dígito y sigue así indefinidamente.
@@ -1979,17 +2293,18 @@ function manualRenderSeqOverlay(){
   manualSeqOverlaySvg.setAttribute('viewBox', '0 0 ' + gridRect.width + ' ' + gridRect.height);
 
   // Quitar el resaltado de cuadro anterior: solo el par actual debe quedar marcado
-  manualSeqTopCells.forEach(c => c.classList.remove('manual-digit-done', 'manual-digit-done2'));
-  if(manualBottomToggleCells[0]) manualBottomToggleCells[0].classList.remove('manual-digit-done');
-  if(manualBottomToggleCells[1]) manualBottomToggleCells[1].classList.remove('manual-digit-done2');
+  manualSeqTopCells.forEach(c => c.classList.remove(...ROUND_DONE_CLASSES));
+  Object.keys(manualBottomToggleCells).forEach(k => {
+    if(manualBottomToggleCells[k]) manualBottomToggleCells[k].classList.remove(...ROUND_DONE_CLASSES);
+  });
 
   if(manualSeqDone) return;
   const topCell = manualSeqTopCells[manualSeqPtr];
   const bottomCell = manualBottomToggleCells[manualSeqRound];
   if(!topCell || !bottomCell) return;
 
-  const roundClass = manualSeqRound === 0 ? 'round0' : 'round1';
-  const doneClass = manualSeqRound === 0 ? 'manual-digit-done' : 'manual-digit-done2';
+  const roundClass = ROUND_LINE_CLASSES[manualSeqRound] || 'round0';
+  const doneClass = ROUND_DONE_CLASSES[manualSeqRound] || 'manual-digit-done';
   topCell.classList.add(doneClass);
   bottomCell.classList.add(doneClass);
 
@@ -2024,6 +2339,10 @@ function manualRenderSeqOverlay(){
 
 function openManualMultModal(){
   if(activeIndex >= factorsOrder.length) return;
+  // manualGrid puede haber quedado apuntando al grid de la pantalla
+  // "Multipliquemos" (mpGrid) si se usó esa pantalla antes; hay que
+  // devolverlo al grid del modal antes de reconstruirlo.
+  manualGrid = originalManualGridEl;
   manualA = currentTable;
   manualB = factorsOrder[activeIndex];
   buildManualGrid(manualA, manualB);
@@ -2053,6 +2372,136 @@ manualMultOverlay.addEventListener('click', (e) => {
   if(e.target === manualMultOverlay) closeManualMultModal();
 });
 
+
+// ---- Multipliquemos: ejercicio de multiplicación manual con dificultad configurable ----
+// Reutiliza el mismo motor de la multiplicación manual (buildManualGrid y compañía),
+// apuntando temporalmente "manualGrid" hacia el grid de esta pantalla (mpGrid) en vez
+// del grid del modal del juego, y devolviéndolo a su elemento original al terminar.
+const menuMultiplyBtn = document.getElementById('menuMultiplyBtn');
+const multiplyConfigScreenEl = document.getElementById('multiplyConfigScreen');
+const multiplyScreenEl = document.getElementById('multiplyScreen');
+const mpDigitsAChips = document.getElementById('mpDigitsAChips');
+const mpDigitsBChips = document.getElementById('mpDigitsBChips');
+const mpStartBtn = document.getElementById('mpStartBtn');
+const mpConfigBackBtn = document.getElementById('mpConfigBackBtn');
+const mpMenuBtn = document.getElementById('mpMenuBtn');
+const mpGridEl = document.getElementById('mpGrid');
+const mpCheckBtn = document.getElementById('mpCheckBtn');
+const mpResultOverlay = document.getElementById('mpResultOverlay');
+const mpResultTitle = document.getElementById('mpResultTitle');
+const mpResultText = document.getElementById('mpResultText');
+const mpResultNewBtn = document.getElementById('mpResultNewBtn');
+const mpResultConfigBtn = document.getElementById('mpResultConfigBtn');
+const mpResultMenuBtn = document.getElementById('mpResultMenuBtn');
+const mpResultRetryBtn = document.getElementById('mpResultRetryBtn');
+const originalManualGridEl = manualGrid;
+
+let mpDigitsA = 2; // cifras del multiplicando
+let mpDigitsB = 1; // cifras del multiplicador
+let mpA = 0, mpB = 0;
+
+// Genera un número al azar con la cantidad de cifras pedida (1 cifra: 1-9, 2 cifras: 10-99)
+function mpRandomWithDigits(digits){
+  if(digits === 1) return 1 + Math.floor(Math.random() * 9);
+  const min = Math.pow(10, digits - 1);
+  const max = Math.pow(10, digits) - 1;
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
+
+function mpSetupChips(container, onPick){
+  container.querySelectorAll('.chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      playClick();
+      container.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      onPick(parseInt(btn.dataset.digits, 10));
+    });
+  });
+}
+mpSetupChips(mpDigitsAChips, (d) => { mpDigitsA = d; });
+mpSetupChips(mpDigitsBChips, (d) => { mpDigitsB = d; });
+
+// Crea un ejercicio nuevo con la configuración actual y lo dibuja en mpGrid.
+// manualGrid se queda apuntando a mpGridEl mientras esta pantalla está
+// visible (no se restaura de inmediato) para que la casilla de llevadas y la
+// línea guía de esta pantalla actúen sobre el grid correcto; se restaura al
+// grid del modal en openManualMultModal, justo antes de usarlo de nuevo.
+function mpBuildExercise(){
+  mpA = mpRandomWithDigits(mpDigitsA);
+  mpB = mpRandomWithDigits(mpDigitsB);
+  manualGrid = mpGridEl;
+  buildManualGrid(mpA, mpB);
+}
+
+// Compara lo que el usuario escribió en las casillas del resultado final contra mpA × mpB
+function mpCheckAnswer(){
+  const finalInputs = manualAllAnswerInputs.slice(-manualFinalRowLength);
+  const product = mpA * mpB;
+  const expectedDigits = String(product).padStart(finalInputs.length, '0').split('');
+  let allFilled = true;
+  let allCorrect = true;
+  finalInputs.forEach((inp, i) => {
+    if(inp.value === '') allFilled = false;
+    if(inp.value !== expectedDigits[i]) allCorrect = false;
+  });
+  playClick();
+  mpResultRetryBtn.style.display = 'none';
+  if(!allFilled){
+    mpResultTitle.textContent = 'Falta completar';
+    mpResultText.textContent = 'Todavía hay casillas del resultado sin llenar.';
+  } else if(allCorrect){
+    mpResultTitle.textContent = '¡Correcto!';
+    mpResultText.textContent = `${mpA} × ${mpB} = ${product}. ¡Muy bien resuelto!`;
+    playCorrect();
+    speak('¡Correcto!');
+  } else {
+    mpResultTitle.textContent = 'Casi...';
+    mpResultText.textContent = 'El resultado todavía no es correcto. ¡Puedes intentarlo de nuevo!';
+    playWrong();
+    speakWrong();
+    mpResultRetryBtn.style.display = '';
+  }
+  mpResultOverlay.classList.add('show');
+}
+
+menuMultiplyBtn.addEventListener('click', () => {
+  playClick();
+  showScreen('multiplyConfigScreen');
+});
+mpConfigBackBtn.addEventListener('click', () => {
+  playClick();
+  goToMenu();
+});
+mpStartBtn.addEventListener('click', () => {
+  playClick();
+  mpBuildExercise();
+  showScreen('multiplyScreen');
+});
+mpMenuBtn.addEventListener('click', () => {
+  playClick();
+  goToMenu();
+});
+mpCheckBtn.addEventListener('click', mpCheckAnswer);
+mpResultNewBtn.addEventListener('click', () => {
+  playClick();
+  mpResultOverlay.classList.remove('show');
+  mpBuildExercise();
+});
+mpResultRetryBtn.addEventListener('click', () => {
+  playClick();
+  mpResultOverlay.classList.remove('show');
+  buildManualGrid(mpA, mpB);
+});
+mpResultConfigBtn.addEventListener('click', () => {
+  playClick();
+  mpResultOverlay.classList.remove('show');
+  showScreen('multiplyConfigScreen');
+});
+mpResultMenuBtn.addEventListener('click', () => {
+  playClick();
+  mpResultOverlay.classList.remove('show');
+  goToMenu();
+});
 
 // La pantalla inicial es la intro (introScreen ya está visible por defecto en el HTML);
 // tras tocarla o pasados unos segundos, se muestra la pantalla de perfiles.
